@@ -4,7 +4,7 @@ import { spawnPty, writePty, resizePty, killPty } from './pty-manager';
 import { loadState, saveState, PersistedState } from './store';
 
 export function registerIpcHandlers(): void {
-  ipcMain.handle('pty:create', (_event, sessionId: string, cwd: string, claudeSessionId: string | null) => {
+  ipcMain.handle('pty:create', (_event, sessionId: string, cwd: string, claudeSessionId: string | null, isResume: boolean) => {
     const win = BrowserWindow.getAllWindows()[0];
     if (!win) return;
 
@@ -12,6 +12,7 @@ export function registerIpcHandlers(): void {
       sessionId,
       cwd,
       claudeSessionId,
+      isResume,
       (data) => {
         const w = BrowserWindow.getAllWindows()[0];
         if (w && !w.isDestroyed()) {

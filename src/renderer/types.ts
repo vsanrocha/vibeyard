@@ -1,6 +1,6 @@
 export interface ClaudeIdeApi {
   pty: {
-    create(sessionId: string, cwd: string, claudeSessionId: string | null): Promise<void>;
+    create(sessionId: string, cwd: string, claudeSessionId: string | null, isResume: boolean): Promise<void>;
     write(sessionId: string, data: string): void;
     resize(sessionId: string, cols: number, rows: number): void;
     kill(sessionId: string): Promise<void>;

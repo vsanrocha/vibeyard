@@ -2,6 +2,7 @@ import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
 import { registerIpcHandlers } from './ipc-handlers';
 import { killAllPtys } from './pty-manager';
+import { flushState } from './store';
 import { createAppMenu } from './menu';
 
 let mainWindow: BrowserWindow | null = null;
@@ -25,7 +26,6 @@ function createWindow(): void {
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
 
   mainWindow.on('closed', () => {
-    killAllPtys();
     mainWindow = null;
   });
 }
@@ -40,6 +40,11 @@ app.whenReady().then(() => {
       createWindow();
     }
   });
+});
+
+app.on('before-quit', () => {
+  flushState();
+  killAllPtys();
 });
 
 app.on('window-all-closed', () => {

@@ -2,7 +2,7 @@ import { contextBridge, ipcRenderer } from 'electron';
 
 export interface ClaudeIdeApi {
   pty: {
-    create(sessionId: string, cwd: string, claudeSessionId: string | null): Promise<void>;
+    create(sessionId: string, cwd: string, claudeSessionId: string | null, isResume: boolean): Promise<void>;
     write(sessionId: string, data: string): void;
     resize(sessionId: string, cols: number, rows: number): void;
     kill(sessionId: string): Promise<void>;
@@ -34,8 +34,8 @@ function onChannel(channel: string, callback: (...args: unknown[]) => void): () 
 
 const api: ClaudeIdeApi = {
   pty: {
-    create: (sessionId, cwd, claudeSessionId) =>
-      ipcRenderer.invoke('pty:create', sessionId, cwd, claudeSessionId),
+    create: (sessionId, cwd, claudeSessionId, isResume) =>
+      ipcRenderer.invoke('pty:create', sessionId, cwd, claudeSessionId, isResume),
     write: (sessionId, data) =>
       ipcRenderer.send('pty:write', sessionId, data),
     resize: (sessionId, cols, rows) =>

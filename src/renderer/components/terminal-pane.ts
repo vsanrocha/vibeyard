@@ -2,6 +2,7 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebglAddon } from '@xterm/addon-webgl';
 import { initSession, removeSession } from '../session-activity.js';
+import { removeSession as removeCostSession } from '../session-cost.js';
 
 interface TerminalInstance {
   terminal: Terminal;
@@ -10,6 +11,7 @@ interface TerminalInstance {
   sessionId: string;
   projectPath: string;
   claudeSessionId: string | null;
+  isResume: boolean;
   spawned: boolean;
   exited: boolean;
 }
@@ -20,7 +22,8 @@ let focusedSessionId: string | null = null;
 export function createTerminalPane(
   sessionId: string,
   projectPath: string,
-  claudeSessionId: string | null
+  claudeSessionId: string | null,
+  isResume: boolean = false
 ): TerminalInstance {
   if (instances.has(sessionId)) {
     return instances.get(sessionId)!;
@@ -29,6 +32,14 @@ export function createTerminalPane(
   const element = document.createElement('div');
   element.className = 'terminal-pane hidden';
   element.dataset.sessionId = sessionId;
+
+  const xtermWrap = document.createElement('div');
+  xtermWrap.className = 'xterm-wrap';
+  element.appendChild(xtermWrap);
+
+  const costBar = document.createElement('div');
+  costBar.className = 'session-cost-bar hidden';
+  element.appendChild(costBar);
 
   const terminal = new Terminal({
     theme: {
@@ -61,6 +72,7 @@ export function createTerminalPane(
     sessionId,
     projectPath,
     claudeSessionId,
+    isResume,
     spawned: false,
     exited: false,
   };
@@ -105,16 +117,18 @@ export async function spawnTerminal(sessionId: string): Promise<void> {
   if (overlay) overlay.remove();
 
   initSession(sessionId);
-  await window.claudeIde.pty.create(sessionId, instance.projectPath, instance.claudeSessionId);
+  await window.claudeIde.pty.create(sessionId, instance.projectPath, instance.claudeSessionId, instance.isResume);
+  instance.isResume = true; // subsequent spawns (e.g. Restart Session) should resume
 }
 
 export function attachToContainer(sessionId: string, container: HTMLElement): void {
   const instance = instances.get(sessionId);
   if (!instance) return;
 
-  if (!instance.element.querySelector('.xterm')) {
+  const xtermWrap = instance.element.querySelector('.xterm-wrap')!;
+  if (!xtermWrap.querySelector('.xterm')) {
     container.appendChild(instance.element);
-    instance.terminal.open(instance.element);
+    instance.terminal.open(xtermWrap as HTMLElement);
 
     // Try WebGL, fall back silently
     try {
@@ -222,4 +236,14 @@ export function destroyTerminal(sessionId: string): void {
   instance.element.remove();
   instances.delete(sessionId);
   removeSession(sessionId);
+  removeCostSession(sessionId);
+}
+
+export function updateCostDisplay(sessionId: string, cost: string): void {
+  const instance = instances.get(sessionId);
+  if (!instance) return;
+  const bar = instance.element.querySelector('.session-cost-bar');
+  if (!bar) return;
+  bar.textContent = `Cost: ${cost}`;
+  bar.classList.remove('hidden');
 }

@@ -44,7 +44,45 @@ function render(): void {
 
     tab.addEventListener('click', (e) => {
       if ((e.target as HTMLElement).classList.contains('tab-close')) return;
-      appState.setActiveSession(project.id, session.id);
+      if (tab.querySelector('.tab-name input')) return;
+      if (session.id !== project.activeSessionId) {
+        appState.setActiveSession(project.id, session.id);
+      }
+    });
+
+    tab.addEventListener('dblclick', () => {
+      const nameSpan = tab.querySelector('.tab-name') as HTMLElement;
+      if (nameSpan.querySelector('input')) return;
+
+      const input = document.createElement('input');
+      input.value = session.name;
+      nameSpan.textContent = '';
+      nameSpan.appendChild(input);
+      input.select();
+
+      let committed = false;
+      const commit = () => {
+        if (committed) return;
+        committed = true;
+        const newName = input.value.trim();
+        if (newName && newName !== session.name) {
+          appState.renameSession(project.id, session.id, newName);
+        } else {
+          nameSpan.textContent = session.name;
+        }
+      };
+
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          commit();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          nameSpan.textContent = session.name;
+        }
+      });
+
+      input.addEventListener('blur', commit);
     });
 
     tab.querySelector('.tab-close')!.addEventListener('click', () => {

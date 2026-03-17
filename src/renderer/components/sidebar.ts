@@ -10,6 +10,8 @@ export function initSidebar(): void {
   appState.on('project-added', render);
   appState.on('project-removed', render);
   appState.on('project-changed', render);
+  appState.on('session-added', render);
+  appState.on('session-removed', render);
   render();
 }
 
@@ -21,7 +23,7 @@ function render(): void {
     el.className = 'project-item' + (project.id === appState.activeProjectId ? ' active' : '');
     el.innerHTML = `
       <div style="flex:1;min-width:0">
-        <div class="project-name">${esc(project.name)}</div>
+        <div class="project-name">${esc(project.name)}${project.sessions.length ? ` <span class="project-session-count">(${project.sessions.length})</span>` : ''}</div>
         <div class="project-path">${esc(project.path)}</div>
       </div>
       <span class="project-delete" title="Remove project">&times;</span>

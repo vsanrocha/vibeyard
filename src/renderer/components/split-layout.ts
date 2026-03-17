@@ -28,12 +28,12 @@ export function initSplitLayout(): void {
 }
 
 function onSessionAdded(data: unknown): void {
-  const { session } = data as { projectId: string; session: { id: string } };
+  const { session } = data as { projectId: string; session: { id: string; claudeSessionId: string | null } };
   const project = appState.activeProject;
   if (!project) return;
 
   // Create and spawn immediately
-  createTerminalPane(session.id, project.path, null);
+  createTerminalPane(session.id, project.path, session.claudeSessionId, false);
   renderLayout();
 
   // Spawn after layout is rendered so terminal has dimensions
@@ -64,7 +64,7 @@ export function renderLayout(): void {
   // Ensure all sessions have terminal instances
   for (const session of project.sessions) {
     if (!getTerminalInstance(session.id)) {
-      createTerminalPane(session.id, project.path, session.claudeSessionId);
+      createTerminalPane(session.id, project.path, session.claudeSessionId, !!session.claudeSessionId);
     }
   }
 

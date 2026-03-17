@@ -61,6 +61,7 @@ export function saveState(state: PersistedState): void {
   if (saveTimer) {
     clearTimeout(saveTimer);
   }
+  lastState = state;
   saveTimer = setTimeout(() => {
     try {
       if (!fs.existsSync(STATE_DIR)) {
@@ -72,6 +73,14 @@ export function saveState(state: PersistedState): void {
     }
     saveTimer = null;
   }, 300);
+}
+
+let lastState: PersistedState | null = null;
+
+export function flushState(): void {
+  if (lastState) {
+    saveStateSync(lastState);
+  }
 }
 
 export function saveStateSync(state: PersistedState): void {

@@ -104,6 +104,11 @@ html, body {
   white-space: nowrap;
 }
 
+.project-session-count {
+  opacity: 0.6;
+  font-size: 0.85em;
+}
+
 .project-item .project-delete {
   opacity: 0;
   cursor: pointer;
@@ -220,6 +225,18 @@ html, body {
   50% { opacity: 0.4; }
 }
 
+.tab-name input {
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  color: inherit;
+  font: inherit;
+  padding: 0 2px;
+  outline: none;
+  width: 100%;
+  min-width: 40px;
+}
+
 .tab-close {
   font-size: 14px;
   line-height: 1;
@@ -291,6 +308,8 @@ html, body {
   border: 2px solid var(--pane-unfocus);
   border-radius: 2px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .terminal-pane.split {
@@ -301,12 +320,35 @@ html, body {
   border-color: var(--pane-focus);
 }
 
+.terminal-pane .xterm-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .terminal-pane .xterm {
   height: 100%;
   padding: 4px;
 }
 
 .terminal-pane.hidden {
+  display: none;
+}
+
+.session-cost-bar {
+  height: 20px;
+  min-height: 20px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: 20px;
+  padding: 0 8px;
+  text-align: right;
+  user-select: none;
+}
+
+.session-cost-bar.hidden {
   display: none;
 }
 

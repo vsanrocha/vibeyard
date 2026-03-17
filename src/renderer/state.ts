@@ -173,6 +173,16 @@ class AppState {
     this.persist();
   }
 
+  renameSession(projectId: string, sessionId: string, name: string): void {
+    const project = this.state.projects.find((p) => p.id === projectId);
+    if (!project) return;
+    const session = project.sessions.find((s) => s.id === sessionId);
+    if (!session) return;
+    session.name = name;
+    this.persist();
+    this.emit('session-changed');
+  }
+
   toggleSplit(): void {
     const project = this.activeProject;
     if (!project) return;

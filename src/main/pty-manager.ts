@@ -11,6 +11,7 @@ export function spawnPty(
   sessionId: string,
   cwd: string,
   claudeSessionId: string | null,
+  isResume: boolean,
   onData: (data: string) => void,
   onExit: (exitCode: number, signal?: number) => void
 ): void {
@@ -23,7 +24,11 @@ export function spawnPty(
 
   const args: string[] = [];
   if (claudeSessionId) {
-    args.push('-r', claudeSessionId);
+    if (isResume) {
+      args.push('-r', claudeSessionId);
+    } else {
+      args.push('--session-id', claudeSessionId);
+    }
   }
 
   const shell = 'claude';
