@@ -22,7 +22,7 @@ Requires Node v24 (see `.nvmrc`). No test or lint tooling is configured.
 Three-process Electron architecture with strict context isolation:
 
 - **Main process** (`src/main/`) — Node.js side: window creation, PTY lifecycle via `node-pty`, filesystem access, persistent state (`~/.claude-ide/state.json`). IPC handlers in `ipc-handlers.ts` dispatch to `pty-manager.ts` and `store.ts`.
-- **Preload** (`src/preload/preload.ts`) — Secure bridge exposing `window.claudeIde` API via `contextBridge` with namespaces: `pty`, `store`, `fs`, `menu`.
+- **Preload** (`src/preload/preload.ts`) — Secure bridge exposing `window.claudeIde` API via `contextBridge` with namespaces: `pty`, `session`, `store`, `fs`, `menu`.
 - **Renderer** (`src/renderer/`) — Vanilla TypeScript DOM UI (no framework). `AppState` singleton in `state.ts` uses an event emitter pattern; components in `components/` subscribe to state changes.
 
 ### Data Flow
@@ -39,7 +39,7 @@ Each process has its own `tsconfig.*.json`. Main and preload compile via `tsc` (
 - `state.ts` — Reactive AppState singleton; debounced persistence (300ms) to `~/.claude-ide/state.json`
 - `split-layout.ts` — Manages tab mode (single terminal) vs split mode (side-by-side)
 - `session-activity.ts` — Tracks working/waiting/idle status with debounced transitions
-- `session-cost.ts` — Parses Claude API cost info from terminal output
+- `session-cost.ts` — Structured cost tracking via Claude CLI status line (`CLAUDE_CODE_STATUSLINE` env var), with regex fallback for older CLI versions. Provides per-session and aggregate cost data (USD, tokens, cache, duration)
 
 ### State Persistence
 

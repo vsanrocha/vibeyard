@@ -25,6 +25,8 @@ export interface ProjectRecord {
     splitPanes: string[];
     splitDirection: 'horizontal' | 'vertical';
   };
+  terminalPanelOpen?: boolean;
+  terminalPanelHeight?: number;
 }
 
 export interface Preferences {
@@ -48,6 +50,7 @@ type EventType =
   | 'session-changed'
   | 'layout-changed'
   | 'preferences-changed'
+  | 'terminal-panel-changed'
   | 'state-loaded';
 
 type EventCallback = (data?: unknown) => void;
@@ -108,6 +111,21 @@ class AppState {
 
   setSidebarWidth(width: number): void {
     this.state.sidebarWidth = width;
+    this.persist();
+  }
+
+  setTerminalPanelOpen(open: boolean): void {
+    const project = this.activeProject;
+    if (!project) return;
+    project.terminalPanelOpen = open;
+    this.persist();
+    this.emit('terminal-panel-changed');
+  }
+
+  setTerminalPanelHeight(height: number): void {
+    const project = this.activeProject;
+    if (!project) return;
+    project.terminalPanelHeight = height;
     this.persist();
   }
 

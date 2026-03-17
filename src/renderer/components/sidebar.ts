@@ -1,12 +1,15 @@
 import { appState } from '../state.js';
 import { showModal, setModalError, closeModal } from './modal.js';
 import { showPreferencesModal } from './preferences-modal.js';
+import { onChange as onCostChange, getAggregateCost } from '../session-cost.js';
 
 const projectListEl = document.getElementById('project-list')!;
 const btnAddProject = document.getElementById('btn-add-project')!;
 const btnPreferences = document.getElementById('btn-preferences')!;
 const sidebarEl = document.getElementById('sidebar')!;
 const resizeHandle = document.getElementById('sidebar-resize-handle')!;
+
+const sidebarFooterEl = document.getElementById('sidebar-footer')!;
 
 const SIDEBAR_MIN = 150;
 const SIDEBAR_MAX = 500;
@@ -26,6 +29,11 @@ export function initSidebar(): void {
   appState.on('project-changed', render);
   appState.on('session-added', render);
   appState.on('session-removed', render);
+
+  onCostChange(() => {
+    renderCostFooter();
+  });
+
   render();
 }
 
@@ -101,6 +109,16 @@ function initResizeHandle(): void {
     document.body.style.cursor = '';
     appState.setSidebarWidth(parseInt(sidebarEl.style.width, 10));
   });
+}
+
+function renderCostFooter(): void {
+  const agg = getAggregateCost();
+  if (agg.totalCostUsd > 0) {
+    sidebarFooterEl.textContent = `Total: $${agg.totalCostUsd.toFixed(4)}`;
+    sidebarFooterEl.classList.remove('hidden');
+  } else {
+    sidebarFooterEl.classList.add('hidden');
+  }
 }
 
 function esc(s: string): string {

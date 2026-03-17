@@ -23,6 +23,7 @@ export function spawnPty(
   const env = { ...process.env };
   delete env.CLAUDE_CODE; // avoid subprocess detection conflicts
   env.CLAUDE_IDE_SESSION_ID = sessionId;
+  env.CLAUDE_CODE_STATUSLINE = '/tmp/ccide/statusline.sh';
 
   const args: string[] = [];
   if (claudeSessionId) {
@@ -75,6 +76,34 @@ export function killPty(sessionId: string): void {
     instance.process.kill();
     ptys.delete(sessionId);
   }
+}
+
+export function spawnShellPty(
+  sessionId: string,
+  cwd: string,
+  onData: (data: string) => void,
+  onExit: (exitCode: number, signal?: number) => void
+): void {
+  if (ptys.has(sessionId)) {
+    killPty(sessionId);
+  }
+
+  const shell = process.env.SHELL || '/bin/zsh';
+  const ptyProcess = pty.spawn(shell, [], {
+    name: 'xterm-256color',
+    cols: 120,
+    rows: 15,
+    cwd,
+    env: { ...process.env },
+  });
+
+  ptyProcess.onData((data) => onData(data));
+  ptyProcess.onExit(({ exitCode, signal }) => {
+    ptys.delete(sessionId);
+    onExit(exitCode, signal);
+  });
+
+  ptys.set(sessionId, { process: ptyProcess, sessionId });
 }
 
 export function killAllPtys(): void {

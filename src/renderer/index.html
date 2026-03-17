@@ -22,17 +22,28 @@
         <div id="project-list"></div>
         <div id="config-sections"></div>
       </div>
+      <div id="sidebar-footer"></div>
     </div>
     <div id="sidebar-resize-handle"></div>
     <div id="main-area">
       <div id="tab-bar">
         <div id="tab-list"></div>
+        <div id="git-status"></div>
         <div id="tab-actions">
+          <button id="btn-toggle-terminal" class="icon-btn" title="Toggle Terminal (Ctrl+`)" style="font-size:13px;">&#x2588;</button>
           <button id="btn-toggle-split" class="icon-btn" title="Toggle Split (Ctrl+\)">&#x2503;</button>
           <button id="btn-add-session" class="icon-btn" title="New Session (Ctrl+Shift+N)">+</button>
         </div>
       </div>
       <div id="terminal-container"></div>
+      <div id="project-terminal-resize-handle" class="hidden"></div>
+      <div id="project-terminal-panel" class="hidden">
+        <div id="project-terminal-header">
+          <span class="project-terminal-title">Terminal</span>
+          <button id="btn-close-terminal" class="icon-btn" title="Close Terminal">&times;</button>
+        </div>
+        <div id="project-terminal-container"></div>
+      </div>
     </div>
   </div>
 

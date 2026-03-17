@@ -1,8 +1,11 @@
 import { appState, type ProjectRecord, type SessionRecord } from '../state.js';
 import { showModal, closeModal } from './modal.js';
 import { onChange as onStatusChange, getStatus, type SessionStatus } from '../session-activity.js';
+import { onChange as onGitStatusChange, getGitStatus, type GitStatus } from '../git-status.js';
+import { onChange as onCostChange, getCost } from '../session-cost.js';
 
 const tabListEl = document.getElementById('tab-list')!;
+const gitStatusEl = document.getElementById('git-status')!;
 const btnAddSession = document.getElementById('btn-add-session')!;
 const btnToggleSplit = document.getElementById('btn-toggle-split')!;
 
@@ -64,6 +67,18 @@ export function initTabBar(): void {
       unreadSessions.delete(project.activeSessionId);
     }
   });
+
+  onCostChange((sessionId, cost) => {
+    const span = tabListEl.querySelector(`.tab-item[data-session-id="${sessionId}"] .tab-cost`) as HTMLElement | null;
+    if (span) {
+      span.textContent = `$${cost.totalCostUsd.toFixed(2)}`;
+    }
+  });
+
+  onGitStatusChange((projectId) => {
+    if (projectId === appState.activeProjectId) renderGitStatus();
+  });
+  appState.on('project-changed', renderGitStatus);
 
   document.addEventListener('click', hideTabContextMenu);
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideTabContextMenu(); });
@@ -216,9 +231,12 @@ function render(): void {
     tab.className = 'tab-item' + (isActive ? ' active' : '') + (isUnread ? ' unread' : '');
     tab.dataset.sessionId = session.id;
     tab.title = buildTooltip(getStatus(session.id), session.claudeSessionId);
+    const costInfo = getCost(session.id);
+    const costLabel = costInfo ? `$${costInfo.totalCostUsd.toFixed(2)}` : '';
     tab.innerHTML = `
       <span class="tab-status ${getStatus(session.id)}"></span>
       <span class="tab-name">${esc(session.name)}</span>
+      <span class="tab-cost">${costLabel}</span>
       <span class="tab-close" title="Close session">&times;</span>
     `;
 
@@ -324,6 +342,40 @@ function render(): void {
 
   // Update split toggle button visual
   btnToggleSplit.style.color = project.layout.mode === 'split' ? 'var(--accent)' : '';
+}
+
+function renderGitStatus(): void {
+  const project = appState.activeProject;
+  if (!project) {
+    gitStatusEl.innerHTML = '';
+    return;
+  }
+
+  const status = getGitStatus(project.id);
+  if (!status || !status.isGitRepo) {
+    gitStatusEl.innerHTML = '';
+    return;
+  }
+
+  const parts: string[] = [];
+
+  if (status.branch) {
+    parts.push(`<span class="git-branch">\u2387 ${esc(status.branch)}</span>`);
+  }
+
+  const ab: string[] = [];
+  if (status.ahead > 0) ab.push(`\u2191${status.ahead}`);
+  if (status.behind > 0) ab.push(`\u2193${status.behind}`);
+  if (ab.length) {
+    parts.push(`<span class="git-ahead-behind">${ab.join(' ')}</span>`);
+  }
+
+  if (status.staged > 0) parts.push(`<span class="git-staged">+${status.staged}</span>`);
+  if (status.modified > 0) parts.push(`<span class="git-modified">~${status.modified}</span>`);
+  if (status.untracked > 0) parts.push(`<span class="git-untracked">?${status.untracked}</span>`);
+  if (status.conflicted > 0) parts.push(`<span class="git-conflicted">!${status.conflicted}</span>`);
+
+  gitStatusEl.innerHTML = parts.join(' ');
 }
 
 export function promptNewSession(): void {

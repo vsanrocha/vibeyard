@@ -1,9 +1,10 @@
 import { ipcMain, BrowserWindow, app } from 'electron';
 import * as fs from 'fs';
-import { spawnPty, writePty, resizePty, killPty } from './pty-manager';
+import { spawnPty, spawnShellPty, writePty, resizePty, killPty } from './pty-manager';
 import { loadState, saveState, PersistedState } from './store';
 import { getClaudeConfig } from './claude-cli';
 import { startWatching, cleanupSessionStatus } from './hook-status';
+import { getGitStatus } from './git-status';
 
 let hookWatcherStarted = false;
 
@@ -32,6 +33,28 @@ export function registerIpcHandlers(): void {
       },
       (exitCode, signal) => {
         cleanupSessionStatus(sessionId);
+        const w = BrowserWindow.getAllWindows()[0];
+        if (w && !w.isDestroyed()) {
+          w.webContents.send('pty:exit', sessionId, exitCode, signal);
+        }
+      }
+    );
+  });
+
+  ipcMain.handle('pty:createShell', (_event, sessionId: string, cwd: string) => {
+    const win = BrowserWindow.getAllWindows()[0];
+    if (!win) return;
+
+    spawnShellPty(
+      sessionId,
+      cwd,
+      (data) => {
+        const w = BrowserWindow.getAllWindows()[0];
+        if (w && !w.isDestroyed()) {
+          w.webContents.send('pty:data', sessionId, data);
+        }
+      },
+      (exitCode, signal) => {
         const w = BrowserWindow.getAllWindows()[0];
         if (w && !w.isDestroyed()) {
           w.webContents.send('pty:exit', sessionId, exitCode, signal);
@@ -73,4 +96,6 @@ export function registerIpcHandlers(): void {
   });
 
   ipcMain.handle('app:getVersion', () => app.getVersion());
+
+  ipcMain.handle('git:getStatus', (_event, projectPath: string) => getGitStatus(projectPath));
 }

@@ -2,7 +2,8 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebglAddon } from '@xterm/addon-webgl';
 import { initSession, removeSession } from '../session-activity.js';
-import { removeSession as removeCostSession } from '../session-cost.js';
+import { removeSession as removeCostSession, type CostInfo } from '../session-cost.js';
+import { removeSession as removeContextSession, type ContextWindowInfo } from '../session-context.js';
 
 interface TerminalInstance {
   terminal: Terminal;
@@ -39,9 +40,15 @@ export function createTerminalPane(
   xtermWrap.className = 'xterm-wrap';
   element.appendChild(xtermWrap);
 
-  const costBar = document.createElement('div');
-  costBar.className = 'session-cost-bar hidden';
-  element.appendChild(costBar);
+  const statusBar = document.createElement('div');
+  statusBar.className = 'session-status-bar hidden';
+  const contextIndicator = document.createElement('div');
+  contextIndicator.className = 'context-indicator';
+  const costDisplay = document.createElement('div');
+  costDisplay.className = 'cost-display';
+  statusBar.appendChild(contextIndicator);
+  statusBar.appendChild(costDisplay);
+  element.appendChild(statusBar);
 
   const terminal = new Terminal({
     theme: {
@@ -240,13 +247,59 @@ export function destroyTerminal(sessionId: string): void {
   instances.delete(sessionId);
   removeSession(sessionId);
   removeCostSession(sessionId);
+  removeContextSession(sessionId);
 }
 
-export function updateCostDisplay(sessionId: string, cost: string): void {
+function formatTokens(n: number): string {
+  if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  return String(n);
+}
+
+function showStatusBar(instance: TerminalInstance): void {
+  const bar = instance.element.querySelector('.session-status-bar');
+  if (bar) bar.classList.remove('hidden');
+}
+
+export function updateCostDisplay(sessionId: string, cost: CostInfo): void {
   const instance = instances.get(sessionId);
   if (!instance) return;
-  const bar = instance.element.querySelector('.session-cost-bar');
-  if (!bar) return;
-  bar.textContent = `Cost: ${cost}`;
-  bar.classList.remove('hidden');
+  const el = instance.element.querySelector('.cost-display');
+  if (!el) return;
+
+  const costStr = `$${cost.totalCostUsd.toFixed(4)}`;
+  if (cost.totalInputTokens > 0 || cost.totalOutputTokens > 0) {
+    el.textContent = `${costStr}  \u00b7  ${formatTokens(cost.totalInputTokens)} in / ${formatTokens(cost.totalOutputTokens)} out`;
+    const durationSec = (cost.totalDurationMs / 1000).toFixed(1);
+    const apiDurationSec = (cost.totalApiDurationMs / 1000).toFixed(1);
+    (el as HTMLElement).title = `Cache read: ${formatTokens(cost.cacheReadTokens)} · Cache create: ${formatTokens(cost.cacheCreationTokens)} · Duration: ${durationSec}s · API: ${apiDurationSec}s`;
+  } else {
+    el.textContent = `${costStr}`;
+    (el as HTMLElement).title = '';
+  }
+  showStatusBar(instance);
+}
+
+export function updateContextDisplay(sessionId: string, info: ContextWindowInfo): void {
+  const instance = instances.get(sessionId);
+  if (!instance) return;
+  const el = instance.element.querySelector('.context-indicator') as HTMLElement | null;
+  if (!el) return;
+
+  const pct = Math.min(Math.round(info.usedPercentage), 100);
+  const filledCount = Math.round(pct / 10);
+  const emptyCount = 10 - filledCount;
+  const bar = '=' .repeat(filledCount) + '-'.repeat(emptyCount);
+  const tokenStr = formatTokens(info.totalTokens);
+
+  el.textContent = `[${bar}] ${pct}% ${tokenStr} tokens`;
+  el.title = `${info.totalTokens.toLocaleString()} / ${info.contextWindowSize.toLocaleString()} tokens`;
+
+  el.classList.remove('warning', 'critical');
+  if (pct >= 90) {
+    el.classList.add('critical');
+  } else if (pct >= 70) {
+    el.classList.add('warning');
+  }
+
+  showStatusBar(instance);
 }

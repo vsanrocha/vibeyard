@@ -1,8 +1,24 @@
 import { contextBridge, ipcRenderer } from 'electron';
 
+export interface CostData {
+  cost: { total_cost_usd: number; total_duration_ms: number; total_api_duration_ms: number };
+  context_window: {
+    total_input_tokens: number;
+    total_output_tokens: number;
+    context_window_tokens?: number;
+    current_usage: {
+      input_tokens: number;
+      output_tokens: number;
+      cache_creation_input_tokens: number;
+      cache_read_input_tokens: number;
+    };
+  };
+}
+
 export interface ClaudeIdeApi {
   pty: {
     create(sessionId: string, cwd: string, claudeSessionId: string | null, isResume: boolean, extraArgs?: string): Promise<void>;
+    createShell(sessionId: string, cwd: string): Promise<void>;
     write(sessionId: string, data: string): void;
     resize(sessionId: string, cols: number, rows: number): void;
     kill(sessionId: string): Promise<void>;
@@ -12,6 +28,7 @@ export interface ClaudeIdeApi {
   session: {
     onHookStatus(callback: (sessionId: string, status: 'working' | 'waiting' | 'completed') => void): () => void;
     onClaudeSessionId(callback: (sessionId: string, claudeSessionId: string) => void): () => void;
+    onCostData(callback: (sessionId: string, costData: CostData) => void): () => void;
   };
   fs: {
     isDirectory(path: string): Promise<boolean>;
@@ -22,6 +39,9 @@ export interface ClaudeIdeApi {
   };
   claude: {
     getConfig(projectPath: string): Promise<unknown>;
+  };
+  git: {
+    getStatus(path: string): Promise<unknown>;
   };
   app: {
     getVersion(): Promise<string>;
@@ -46,6 +66,8 @@ const api: ClaudeIdeApi = {
   pty: {
     create: (sessionId, cwd, claudeSessionId, isResume, extraArgs) =>
       ipcRenderer.invoke('pty:create', sessionId, cwd, claudeSessionId, isResume, extraArgs || ''),
+    createShell: (sessionId, cwd) =>
+      ipcRenderer.invoke('pty:createShell', sessionId, cwd),
     write: (sessionId, data) =>
       ipcRenderer.send('pty:write', sessionId, data),
     resize: (sessionId, cols, rows) =>
@@ -65,6 +87,9 @@ const api: ClaudeIdeApi = {
     onClaudeSessionId: (callback) =>
       onChannel('session:claudeSessionId', (sessionId, claudeSessionId) =>
         callback(sessionId as string, claudeSessionId as string)),
+    onCostData: (callback) =>
+      onChannel('session:costData', (sessionId, costData) =>
+        callback(sessionId as string, costData as CostData)),
   },
   fs: {
     isDirectory: (path) => ipcRenderer.invoke('fs:isDirectory', path),
@@ -75,6 +100,9 @@ const api: ClaudeIdeApi = {
   store: {
     load: () => ipcRenderer.invoke('store:load'),
     save: (state) => ipcRenderer.invoke('store:save', state),
+  },
+  git: {
+    getStatus: (path) => ipcRenderer.invoke('git:getStatus', path),
   },
   app: {
     getVersion: () => ipcRenderer.invoke('app:getVersion'),

@@ -86,6 +86,19 @@ html, body {
   overflow-y: auto;
 }
 
+#sidebar-footer {
+  border-top: 1px solid var(--border);
+  padding: 6px 12px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+#sidebar-footer.hidden {
+  display: none;
+}
+
 #project-list {
   padding: 4px 0;
 }
@@ -261,6 +274,16 @@ html, body {
   min-width: 40px;
 }
 
+.tab-cost {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+.tab-cost:empty {
+  display: none;
+}
+
 .tab-close {
   font-size: 14px;
   line-height: 1;
@@ -274,6 +297,46 @@ html, body {
 }
 
 .tab-close:hover {
+  color: var(--accent);
+}
+
+/* Git status indicator */
+#git-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  font-size: 11px;
+  white-space: nowrap;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+#git-status:empty {
+  display: none;
+}
+
+#git-status .git-branch {
+  color: var(--text-secondary);
+}
+
+#git-status .git-ahead-behind {
+  color: var(--text-muted);
+}
+
+#git-status .git-staged {
+  color: #34a853;
+}
+
+#git-status .git-modified {
+  color: #f4b400;
+}
+
+#git-status .git-untracked {
+  color: var(--text-muted);
+}
+
+#git-status .git-conflicted {
   color: var(--accent);
 }
 
@@ -359,7 +422,7 @@ html, body {
   display: none;
 }
 
-.session-cost-bar {
+.session-status-bar {
   height: 20px;
   min-height: 20px;
   background: var(--bg-secondary);
@@ -368,12 +431,34 @@ html, body {
   font-size: 11px;
   line-height: 20px;
   padding: 0 8px;
-  text-align: right;
+  display: flex;
+  justify-content: space-between;
   user-select: none;
 }
 
-.session-cost-bar.hidden {
+.session-status-bar.hidden {
   display: none;
+}
+
+.context-indicator {
+  font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+  white-space: nowrap;
+}
+
+.context-indicator:empty {
+  display: none;
+}
+
+.context-indicator.warning {
+  color: #f4b400;
+}
+
+.context-indicator.critical {
+  color: var(--accent);
+}
+
+.cost-display {
+  white-space: nowrap;
 }
 
 .terminal-exit-overlay {
@@ -749,6 +834,68 @@ html, body {
   height: 1px;
   background: var(--border);
   margin: 4px 0;
+}
+
+/* Project terminal panel */
+#project-terminal-panel {
+  display: flex;
+  flex-direction: column;
+  height: 200px;
+  min-height: 80px;
+  border-top: 1px solid var(--border);
+  background: var(--bg-primary);
+}
+
+#project-terminal-panel.hidden {
+  display: none;
+}
+
+#project-terminal-resize-handle {
+  height: 4px;
+  cursor: row-resize;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+#project-terminal-resize-handle:hover,
+#project-terminal-resize-handle.active {
+  background: var(--accent);
+}
+
+#project-terminal-resize-handle.hidden {
+  display: none;
+}
+
+#project-terminal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  height: 28px;
+  min-height: 28px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+}
+
+.project-terminal-title {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+}
+
+#project-terminal-container {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+#project-terminal-container .xterm {
+  height: 100%;
+  padding: 4px;
 }
 
 /* Tab drag reorder */

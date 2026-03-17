@@ -3,9 +3,25 @@ export interface Agent { name: string; model: string; category: 'plugin' | 'buil
 export interface Skill { name: string; description: string; scope: 'user' | 'project' }
 export interface ClaudeConfig { mcpServers: McpServer[]; agents: Agent[]; skills: Skill[] }
 
+export interface CostData {
+  cost: { total_cost_usd: number; total_duration_ms: number; total_api_duration_ms: number };
+  context_window: {
+    total_input_tokens: number;
+    total_output_tokens: number;
+    context_window_tokens?: number;
+    current_usage: {
+      input_tokens: number;
+      output_tokens: number;
+      cache_creation_input_tokens: number;
+      cache_read_input_tokens: number;
+    };
+  };
+}
+
 export interface ClaudeIdeApi {
   pty: {
     create(sessionId: string, cwd: string, claudeSessionId: string | null, isResume: boolean): Promise<void>;
+    createShell(sessionId: string, cwd: string): Promise<void>;
     write(sessionId: string, data: string): void;
     resize(sessionId: string, cols: number, rows: number): void;
     kill(sessionId: string): Promise<void>;
@@ -15,6 +31,7 @@ export interface ClaudeIdeApi {
   session: {
     onHookStatus(callback: (sessionId: string, status: 'working' | 'waiting') => void): () => void;
     onClaudeSessionId(callback: (sessionId: string, claudeSessionId: string) => void): () => void;
+    onCostData(callback: (sessionId: string, costData: CostData) => void): () => void;
   };
   store: {
     load(): Promise<unknown>;
@@ -22,6 +39,9 @@ export interface ClaudeIdeApi {
   };
   claude: {
     getConfig(projectPath: string): Promise<ClaudeConfig>;
+  };
+  git: {
+    getStatus(path: string): Promise<unknown>;
   };
   app: {
     getVersion(): Promise<string>;
