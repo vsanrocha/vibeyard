@@ -1,6 +1,6 @@
 import { appState } from '../state.js';
 import { closeModal } from './modal.js';
-import { setDebugVisible } from './debug-panel.js';
+
 
 const overlay = document.getElementById('modal-overlay')!;
 const modal = document.getElementById('modal')!;
@@ -50,7 +50,7 @@ export function showPreferencesModal(): void {
   // Build section content
   let currentSection: Section = 'general';
   let soundCheckbox: HTMLInputElement | null = null;
-  let debugCheckbox: HTMLInputElement | null = null;
+
 
   function renderSection(section: Section) {
     currentSection = section;
@@ -78,22 +78,6 @@ export function showPreferencesModal(): void {
       row.appendChild(soundCheckbox);
       content.appendChild(row);
 
-      // Debug mode toggle
-      const debugRow = document.createElement('div');
-      debugRow.className = 'modal-toggle-field';
-
-      const debugLabel = document.createElement('label');
-      debugLabel.htmlFor = 'pref-debug-mode';
-      debugLabel.textContent = 'Debug mode (show hook events panel)';
-
-      debugCheckbox = document.createElement('input');
-      debugCheckbox.type = 'checkbox';
-      debugCheckbox.id = 'pref-debug-mode';
-      debugCheckbox.checked = appState.preferences.debugMode;
-
-      debugRow.appendChild(debugLabel);
-      debugRow.appendChild(debugCheckbox);
-      content.appendChild(debugRow);
     } else if (section === 'about') {
       const aboutDiv = document.createElement('div');
       aboutDiv.className = 'about-section';
@@ -139,10 +123,6 @@ export function showPreferencesModal(): void {
   const save = () => {
     if (soundCheckbox) {
       appState.setPreference('soundOnSessionWaiting', soundCheckbox.checked);
-    }
-    if (debugCheckbox) {
-      appState.setPreference('debugMode', debugCheckbox.checked);
-      setDebugVisible(debugCheckbox.checked);
     }
   };
 

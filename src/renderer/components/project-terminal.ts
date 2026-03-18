@@ -2,6 +2,7 @@ import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { WebglAddon } from '@xterm/addon-webgl';
 import { appState } from '../state.js';
+import { fitAllVisible } from './terminal-pane.js';
 
 interface ShellTerminalInstance {
   terminal: Terminal;
@@ -129,6 +130,7 @@ function showPanel(projectId: string): void {
   // Fit after visible
   requestAnimationFrame(() => {
     fitShellTerminal(projectId);
+    fitAllVisible();
     instance.terminal.focus();
   });
 }
@@ -136,6 +138,7 @@ function showPanel(projectId: string): void {
 function hidePanel(): void {
   panelEl.classList.add('hidden');
   resizeHandleEl.classList.add('hidden');
+  requestAnimationFrame(() => fitAllVisible());
 }
 
 function fitShellTerminal(projectId: string): void {
@@ -250,6 +253,7 @@ export function initProjectTerminal(): void {
     if (currentProjectId) {
       fitShellTerminal(currentProjectId);
     }
+    fitAllVisible();
   });
 
   document.addEventListener('mouseup', () => {
@@ -264,6 +268,7 @@ export function initProjectTerminal(): void {
     if (currentProjectId) {
       fitShellTerminal(currentProjectId);
     }
+    fitAllVisible();
   });
 
   // React to project changes
