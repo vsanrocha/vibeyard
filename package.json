@@ -29,18 +29,8 @@
         "dmg",
         "zip"
       ],
-      "category": "public.app-category.developer-tools"
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ]
-    },
-    "win": {
-      "target": [
-        "nsis"
-      ]
+      "category": "public.app-category.developer-tools",
+      "identity": null
     },
     "publish": {
       "provider": "github",
