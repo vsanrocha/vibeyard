@@ -104,6 +104,16 @@ function renderList(history: ArchivedSession[]): void {
     const item = document.createElement('div');
     item.className = 'history-item';
 
+    if (archived.cliSessionId) {
+      item.style.cursor = 'pointer';
+      item.addEventListener('click', () => {
+        const project = appState.activeProject;
+        if (project) {
+          appState.resumeFromHistory(project.id, archived.id);
+        }
+      });
+    }
+
     const info = document.createElement('div');
     info.className = 'history-item-info';
 
@@ -127,21 +137,6 @@ function renderList(history: ArchivedSession[]): void {
 
     const actions = document.createElement('div');
     actions.className = 'history-item-actions';
-
-    if (archived.cliSessionId) {
-      const resumeBtn = document.createElement('button');
-      resumeBtn.className = 'history-resume-btn';
-      resumeBtn.textContent = 'Resume';
-      resumeBtn.title = 'Resume this session';
-      resumeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const project = appState.activeProject;
-        if (project) {
-          appState.resumeFromHistory(project.id, archived.id);
-        }
-      });
-      actions.appendChild(resumeBtn);
-    }
 
     const removeBtn = document.createElement('button');
     removeBtn.className = 'history-remove-btn';
