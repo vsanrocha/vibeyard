@@ -21,6 +21,35 @@ function isWithinKnownProject(resolvedPath: string): boolean {
   return state.projects.some(p => resolvedPath.startsWith(p.path + path.sep) || resolvedPath === p.path);
 }
 
+/**
+ * Check if a resolved path is allowed for reading:
+ * within a known project directory OR a known config location.
+ */
+function isAllowedReadPath(resolvedPath: string): boolean {
+  // Allow files within known project directories
+  if (isWithinKnownProject(resolvedPath)) {
+    return true;
+  }
+
+  // Allow known config files/directories used by Claude CLI
+  const home = os.homedir();
+  const allowedPaths = [
+    path.join(home, '.claude.json'),
+    path.join(home, '.mcp.json'),
+    path.join(home, '.claude') + path.sep,
+  ];
+
+  if (process.platform === 'darwin') {
+    allowedPaths.push('/Library/Application Support/ClaudeCode/');
+  } else if (process.platform === 'win32') {
+    allowedPaths.push('C:\\Program Files\\ClaudeCode\\');
+  } else {
+    allowedPaths.push('/etc/claude-code/');
+  }
+
+  return allowedPaths.some(allowed => resolvedPath === allowed || resolvedPath.startsWith(allowed));
+}
+
 let hookWatcherStarted = false;
 
 export function resetHookWatcher(): void {
@@ -200,8 +229,8 @@ export function registerIpcHandlers(): void {
     try {
       // Security: resolve to absolute and check it's within a known project directory
       const resolved = path.resolve(filePath);
-      if (!isWithinKnownProject(resolved)) {
-        console.warn(`fs:readFile blocked: ${resolved} is not within a known project`);
+      if (!isAllowedReadPath(resolved)) {
+        console.warn(`fs:readFile blocked: ${resolved} is not within an allowed path`);
         return '';
       }
       return fs.readFileSync(resolved, 'utf-8');
