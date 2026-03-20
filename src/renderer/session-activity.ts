@@ -29,6 +29,10 @@ export function setHookStatus(sessionId: string, status: 'working' | 'waiting' |
   if (state.stalenessTimer !== null) clearTimeout(state.stalenessTimer);
   state.stalenessTimer = null;
 
+  // Don't let Stop/StopFailure ('waiting') overwrite a just-set 'completed' status.
+  // Completed is sticky until a new prompt ('working') or PTY exit ('idle').
+  if (status === 'waiting' && state.status === 'completed') return;
+
   setStatus(sessionId, status);
 
   if (status === 'working') {

@@ -78,6 +78,20 @@ describe('setHookStatus', () => {
     expect(getStatus('s1')).toBe('permission');
   });
 
+  it('does not overwrite completed with waiting', () => {
+    initSession('s1');
+    setHookStatus('s1', 'completed');
+    setHookStatus('s1', 'waiting');
+    expect(getStatus('s1')).toBe('completed');
+  });
+
+  it('allows working to overwrite completed (new prompt)', () => {
+    initSession('s1');
+    setHookStatus('s1', 'completed');
+    setHookStatus('s1', 'working');
+    expect(getStatus('s1')).toBe('working');
+  });
+
   it('does not notify if status unchanged', () => {
     initSession('s1');
     setHookStatus('s1', 'waiting');
