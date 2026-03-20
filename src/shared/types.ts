@@ -133,6 +133,7 @@ export interface Preferences {
   soundOnSessionWaiting: boolean;
   debugMode: boolean;
   sessionHistoryEnabled: boolean;
+  insightsEnabled: boolean;
   keybindings?: Record<string, string>;
   sidebarViews?: {
     configSections: boolean;

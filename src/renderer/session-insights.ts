@@ -8,6 +8,7 @@ type AlertCallback = (projectId: string, results: InsightResult[]) => void;
 const capturedSessions = new Set<string>();
 const freshSessions = new Set<string>();
 const alertListeners: AlertCallback[] = [];
+let cleanupListenerAttached = false;
 
 /** Mark a session as fresh (not resumed) — call before spawnTerminal sets isResume=true */
 export function markFreshSession(sessionId: string): void {
@@ -34,6 +35,7 @@ export function captureInitialContext(
   if (!contextWindow) return;
   if (capturedSessions.has(sessionId)) return;
   if (!freshSessions.has(sessionId)) return;
+  if (!appState.preferences.insightsEnabled) return;
 
   capturedSessions.add(sessionId);
 
@@ -73,6 +75,17 @@ export function captureInitialContext(
 /** Subscribe to insight alerts */
 export function onAlert(callback: AlertCallback): void {
   alertListeners.push(callback);
+  // Attach session cleanup listener once
+  if (!cleanupListenerAttached) {
+    cleanupListenerAttached = true;
+    appState.on('session-removed', (data?: unknown) => {
+      const d = data as { sessionId?: string } | undefined;
+      if (d?.sessionId) {
+        capturedSessions.delete(d.sessionId);
+        freshSessions.delete(d.sessionId);
+      }
+    });
+  }
 }
 
 /** Dismiss an insight for a project (persisted) */
@@ -85,4 +98,5 @@ export function _resetForTesting(): void {
   capturedSessions.clear();
   freshSessions.clear();
   alertListeners.length = 0;
+  cleanupListenerAttached = false;
 }

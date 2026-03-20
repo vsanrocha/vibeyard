@@ -2503,6 +2503,23 @@ select.mcp-form-input {
   background: rgba(255, 255, 255, 0.1);
 }
 
+.insight-alert-cta {
+  background: var(--accent);
+  border: none;
+  color: var(--bg-primary);
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  font-weight: 500;
+}
+
+.insight-alert-cta:hover {
+  opacity: 0.9;
+}
+
 .insight-alert-close {
   background: none;
   border: none;

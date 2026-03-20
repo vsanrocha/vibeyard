@@ -54,6 +54,7 @@ export function showPreferencesModal(): void {
   let currentSection: Section = 'general';
   let soundCheckbox: HTMLInputElement | null = null;
   let historyCheckbox: HTMLInputElement | null = null;
+  let insightsCheckbox: HTMLInputElement | null = null;
   let sidebarCheckboxes: { configSections: HTMLInputElement; gitPanel: HTMLInputElement; sessionHistory: HTMLInputElement; costFooter: HTMLInputElement } | null = null;
   let activeRecorder: { cleanup: () => void } | null = null;
 
@@ -106,6 +107,22 @@ export function showPreferencesModal(): void {
       historyRow.appendChild(historyLabel);
       historyRow.appendChild(historyCheckbox);
       content.appendChild(historyRow);
+
+      const insightsRow = document.createElement('div');
+      insightsRow.className = 'modal-toggle-field';
+
+      const insightsLabel = document.createElement('label');
+      insightsLabel.htmlFor = 'pref-insights-enabled';
+      insightsLabel.textContent = 'Show insight alerts';
+
+      insightsCheckbox = document.createElement('input');
+      insightsCheckbox.type = 'checkbox';
+      insightsCheckbox.id = 'pref-insights-enabled';
+      insightsCheckbox.checked = appState.preferences.insightsEnabled;
+
+      insightsRow.appendChild(insightsLabel);
+      insightsRow.appendChild(insightsCheckbox);
+      content.appendChild(insightsRow);
 
     } else if (section === 'sidebar') {
       const views = appState.preferences.sidebarViews ?? { configSections: true, gitPanel: true, sessionHistory: true, costFooter: true };
@@ -315,6 +332,9 @@ export function showPreferencesModal(): void {
     }
     if (historyCheckbox) {
       appState.setPreference('sessionHistoryEnabled', historyCheckbox.checked);
+    }
+    if (insightsCheckbox) {
+      appState.setPreference('insightsEnabled', insightsCheckbox.checked);
     }
     if (sidebarCheckboxes) {
       appState.setPreference('sidebarViews', {
