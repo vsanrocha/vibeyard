@@ -13,6 +13,13 @@ A terminal-centric IDE for AI-powered CLI tools. Manage multiple sessions, track
 - **Session resume** — sessions persist across app restarts via CLI session IDs
 - **Project terminal** — built-in shell terminal per project for quick commands
 - **MCP Inspector** — integrated MCP server inspection tool
+- **Session insights** — smart alerts that monitor session health, starting with pre-context usage. When a new session's pre-context exceeds 15% of the context window, CCIDE shows an alert with exact token counts and a one-click "Fix in New Session" action that launches Claude to analyze and reduce context bloat. Dismissible per-project and toggleable in preferences.
+- **Context window tracking** — real-time context usage displayed in the status bar, persisted across restarts
+- **Session history** — archived sessions with resume support, automatic archiving on `/clear`
+- **Usage stats** — aggregated CLI usage statistics from Claude Code's stats cache
+- **Clickable file paths** — click file paths in terminal output to navigate to them
+- **Unread indicators** — visual indicators on sidebar projects for sessions with new activity
+- **Tab reordering** — drag-and-drop and context menu (move left/right) tab management
 
 ## Prerequisites
 
@@ -29,10 +36,6 @@ A terminal-centric IDE for AI-powered CLI tools. Manage multiple sessions, track
    ```bash
    xattr -cr /Applications/CCIDE.app
    ```
-
-### Linux
-
-Download the `.AppImage` or `.deb` from [GitHub Releases](https://github.com/elirantutia/ccide/releases).
 
 ### Build from Source
 
