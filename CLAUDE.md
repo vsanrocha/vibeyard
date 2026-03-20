@@ -67,6 +67,13 @@ CLI-specific behavior is encapsulated behind a `CliProvider` interface (`src/mai
 
 App state (projects, sessions, layout) persists to `~/.ccide/state.json` via the main process store. Saves are debounced and flushed on quit. Sessions track `cliSessionId` for CLI session resume capability. Legacy `claudeSessionId` fields are auto-migrated on load.
 
+## Post-Implementation
+
+After completing an implementation task, always:
+
+1. Run `/simplify` to review changed code for reuse, quality, and efficiency.
+2. Add or update tests as needed to cover the changes.
+
 ## Git Workflow
 
 Always use the `/commit` command when committing changes to this project. Do not create commits manually.
