@@ -429,7 +429,7 @@ describe('removeSession()', () => {
 
   it('clears session from splitPanes', () => {
     const { project, sessions } = addProjectWithSessions(2);
-    appState.toggleSplit(); // populate splitPanes
+    // default mode is swarm, so splitPanes are auto-populated
     expect(appState.activeProject!.layout.splitPanes.length).toBeGreaterThan(0);
     appState.removeSession(project.id, sessions[0].id);
     expect(appState.activeProject!.layout.splitPanes).not.toContain(sessions[0].id);
@@ -566,29 +566,30 @@ describe('renameSession()', () => {
 });
 
 describe('toggleSplit() / toggleSwarm()', () => {
-  it('switches from tabs to swarm and populates splitPanes', () => {
-    const { project, sessions } = addProjectWithSessions(3);
-    // active session is sessions[2] (the last added)
-    appState.toggleSwarm();
-    const layout = appState.activeProject!.layout;
-    expect(layout.mode).toBe('swarm');
-    expect(layout.splitPanes).toContain(sessions[2].id);
-    expect(layout.splitPanes.length).toBe(3);
-  });
-
-  it('switches from swarm back to tabs and clears splitPanes', () => {
-    addProjectWithSessions(2);
-    appState.toggleSwarm(); // tabs -> swarm
+  it('switches from swarm to tabs and clears splitPanes', () => {
+    addProjectWithSessions(3);
+    // default mode is swarm with sessions auto-populated
+    expect(appState.activeProject!.layout.mode).toBe('swarm');
+    expect(appState.activeProject!.layout.splitPanes.length).toBe(3);
     appState.toggleSwarm(); // swarm -> tabs
     const layout = appState.activeProject!.layout;
     expect(layout.mode).toBe('tabs');
     expect(layout.splitPanes).toEqual([]);
   });
 
+  it('switches from tabs back to swarm and populates splitPanes', () => {
+    const { project, sessions } = addProjectWithSessions(2);
+    appState.toggleSwarm(); // swarm -> tabs
+    appState.toggleSwarm(); // tabs -> swarm
+    const layout = appState.activeProject!.layout;
+    expect(layout.mode).toBe('swarm');
+    expect(layout.splitPanes.length).toBe(2);
+  });
+
   it('toggleSplit delegates to toggleSwarm', () => {
     addProjectWithSessions(2);
-    appState.toggleSplit();
-    expect(appState.activeProject!.layout.mode).toBe('swarm');
+    appState.toggleSplit(); // swarm -> tabs
+    expect(appState.activeProject!.layout.mode).toBe('tabs');
   });
 
   it('emits layout-changed', () => {
@@ -599,16 +600,15 @@ describe('toggleSplit() / toggleSwarm()', () => {
     expect(cb).toHaveBeenCalledTimes(1);
   });
 
-  it('includes all CLI sessions in splitPanes', () => {
+  it('includes all CLI sessions in splitPanes by default', () => {
     addProjectWithSessions(8);
-    appState.toggleSwarm();
     const layout = appState.activeProject!.layout;
+    expect(layout.mode).toBe('swarm');
     expect(layout.splitPanes.length).toBe(8);
   });
 
-  it('enters swarm with a single CLI session', () => {
+  it('starts in swarm with a single CLI session', () => {
     addProjectWithSessions(1);
-    appState.toggleSwarm();
     const layout = appState.activeProject!.layout;
     expect(layout.mode).toBe('swarm');
     expect(layout.splitPanes.length).toBe(1);
@@ -616,17 +616,18 @@ describe('toggleSplit() / toggleSwarm()', () => {
 
   it('stays in swarm when removing sessions down to 1 pane', () => {
     const { project, sessions } = addProjectWithSessions(2);
-    appState.toggleSwarm();
+    // already in swarm mode by default
     appState.removeSession(project.id, sessions[0].id);
     const layout = appState.activeProject!.layout;
     expect(layout.mode).toBe('swarm');
     expect(layout.splitPanes.length).toBe(1);
   });
 
-  it('places activeSessionId first in splitPanes', () => {
+  it('places activeSessionId first in splitPanes when toggling to swarm', () => {
     const { project, sessions } = addProjectWithSessions(3);
+    appState.toggleSwarm(); // swarm -> tabs
     appState.setActiveSession(project.id, sessions[0].id);
-    appState.toggleSwarm();
+    appState.toggleSwarm(); // tabs -> swarm
     expect(appState.activeProject!.layout.splitPanes[0]).toBe(sessions[0].id);
   });
 });
@@ -715,7 +716,7 @@ describe('reorderSession()', () => {
 
   it('syncs splitPanes order when reordering sessions', () => {
     const { project, sessions } = addProjectWithSessions(3);
-    appState.toggleSwarm();
+    // already in swarm mode by default
     const panesBefore = [...appState.activeProject!.layout.splitPanes];
     expect(panesBefore).toContain(sessions[0].id);
     expect(panesBefore).toContain(sessions[1].id);

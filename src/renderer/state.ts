@@ -154,7 +154,7 @@ class AppState {
       path,
       sessions: [],
       activeSessionId: null,
-      layout: { mode: 'tabs', splitPanes: [], splitDirection: 'horizontal' },
+      layout: { mode: 'swarm', splitPanes: [], splitDirection: 'horizontal' },
     };
     this.state.projects.push(project);
     this.state.activeProjectId = project.id;
