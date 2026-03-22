@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.9] - 2026-03-22
+
+### Fixes
+- Add picomatch to production dependencies for release builds
+
 ## [0.2.8] - 2026-03-22
 
 ### Features
