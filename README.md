@@ -1,6 +1,19 @@
-# Vibeyard
+<p align="center">
+  <img src="build/icon.png" alt="Vibeyard" width="128" />
+</p>
 
-A terminal-centric IDE for AI-powered CLI tools. Manage multiple sessions, track costs, and work with split panes — all from a keyboard-driven Electron app.
+<h1 align="center">Vibeyard</h1>
+
+<p align="center">
+  <a href="https://github.com/elirantutia/vibeyard/releases"><img src="https://img.shields.io/github/v/release/elirantutia/vibeyard" alt="GitHub Release" /></a>
+  <a href="https://github.com/elirantutia/vibeyard/blob/main/LICENSE"><img src="https://img.shields.io/github/license/elirantutia/vibeyard" alt="License" /></a>
+  <a href="https://github.com/elirantutia/vibeyard/issues"><img src="https://img.shields.io/github/issues/elirantutia/vibeyard" alt="Issues" /></a>
+  <a href="https://github.com/elirantutia/vibeyard/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen" alt="PRs Welcome" /></a>
+</p>
+
+<p align="center">
+  A terminal-centric IDE for AI-powered CLI tools. Manage multiple sessions, track costs, and work with split panes — all from a keyboard-driven Electron app.
+</p>
 
 ## Features
 
