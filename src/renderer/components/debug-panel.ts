@@ -22,7 +22,7 @@ const TYPE_COLORS: Record<string, string> = {
   'hookStatus': '#f4b400',
   'costData': '#34a853',
   'cliSessionId': '#4285f4',
-  'ptyData': '#888',
+
   'ptyExit': '#e94560',
   'stateEvent': '#bb86fc',
 };
@@ -81,10 +81,7 @@ function appendEventRow(ev: DebugEvent): void {
 
   if (ev.data !== undefined) {
     const dataStr = formatData(ev.data);
-    // For ptyData, truncate
-    const truncated = ev.type === 'ptyData' && dataStr.length > 120
-      ? dataStr.slice(0, 120) + '...'
-      : dataStr;
+    const truncated = dataStr.length > 120 ? dataStr.slice(0, 120) + '...' : dataStr;
     const dataEl = document.createElement('span');
     dataEl.className = 'debug-data';
     dataEl.textContent = truncated;

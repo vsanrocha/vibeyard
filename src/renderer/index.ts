@@ -29,7 +29,6 @@ window.claudeIde.app.onQuitting(() => { isQuitting = true; });
 async function main(): Promise<void> {
   // Wire PTY data/exit events from main process
   window.claudeIde.pty.onData((sessionId, data) => {
-    logDebugEvent('ptyData', sessionId, data.slice(0, 200));
     if (isShellSessionId(sessionId)) {
       handleShellPtyData(sessionId, data);
     } else if (!isMcpSession(sessionId)) {
