@@ -6,6 +6,7 @@ import { initKeybindings } from './keybindings.js';
 import { handlePtyData, destroyTerminal, updateCostDisplay, updateContextDisplay } from './components/terminal-pane.js';
 import { setIdle, setHookStatus, notifyPtyData, notifyInterrupt } from './session-activity.js';
 import { parseCost, setCostData, onChange as onCostChange } from './session-cost.js';
+import { parseTitle, clearSession as clearTitleSession } from './session-title.js';
 import { setContextData, onChange as onContextChange } from './session-context.js';
 import { initConfigSections } from './components/config-sections.js';
 import { initNotificationSound } from './notification-sound.js';
@@ -34,6 +35,7 @@ async function main(): Promise<void> {
     } else if (!isMcpSession(sessionId)) {
       handlePtyData(sessionId, data);
       parseCost(sessionId, data);
+      parseTitle(sessionId, data);
       if (data.includes('Interrupted')) {
         notifyInterrupt(sessionId);
       } else {
@@ -69,6 +71,7 @@ async function main(): Promise<void> {
     // Find the project containing this session and persist the CLI session ID
     const project = appState.projects.find(p => p.sessions.some(s => s.id === sessionId));
     if (project) {
+      clearTitleSession(sessionId);
       appState.updateSessionCliId(project.id, sessionId, cliSessionId);
     }
   });
@@ -82,6 +85,7 @@ async function main(): Promise<void> {
       const project = appState.projects.find(p => p.sessions.some(s => s.id === sessionId));
       if (project) {
         destroyTerminal(sessionId);
+        clearTitleSession(sessionId);
         appState.removeSession(project.id, sessionId);
       }
     }

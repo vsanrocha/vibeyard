@@ -34,6 +34,7 @@ const defaultPreferences: Preferences = {
   debugMode: false,
   sessionHistoryEnabled: true,
   insightsEnabled: true,
+  autoTitleEnabled: true,
   sidebarViews: { configSections: true, gitPanel: true, sessionHistory: true, costFooter: true, readinessSection: true },
 };
 
@@ -415,6 +416,7 @@ class AppState {
     if (session.cliSessionId && session.cliSessionId !== cliSessionId) {
       this.archiveSession(project, session);
       session.name = `Session ${project.sessions.length + (project.sessionHistory?.length || 0)}`;
+      session.userRenamed = false;
     }
 
     session.cliSessionId = cliSessionId;
@@ -449,12 +451,13 @@ class AppState {
     this.persist();
   }
 
-  renameSession(projectId: string, sessionId: string, name: string): void {
+  renameSession(projectId: string, sessionId: string, name: string, userRenamed?: boolean): void {
     const project = this.state.projects.find((p) => p.id === projectId);
     if (!project) return;
     const session = project.sessions.find((s) => s.id === sessionId);
     if (!session) return;
     session.name = name;
+    if (userRenamed) session.userRenamed = true;
     // Keep history entry in sync if this session was resumed from history
     if (session.cliSessionId && project.sessionHistory) {
       const historyEntry = project.sessionHistory.find((a) => a.cliSessionId === session.cliSessionId);

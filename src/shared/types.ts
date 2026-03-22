@@ -80,6 +80,7 @@ export interface SessionRecord {
   fileReaderPath?: string;
   fileReaderLine?: number;
   createdAt: string;
+  userRenamed?: boolean;
   cost?: CostInfo;
   contextWindow?: ContextWindowInfo;
 }
@@ -136,6 +137,7 @@ export interface Preferences {
   debugMode: boolean;
   sessionHistoryEnabled: boolean;
   insightsEnabled: boolean;
+  autoTitleEnabled: boolean;
   keybindings?: Record<string, string>;
   sidebarViews?: {
     configSections: boolean;

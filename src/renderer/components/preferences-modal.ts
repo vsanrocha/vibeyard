@@ -55,6 +55,7 @@ export function showPreferencesModal(): void {
   let soundCheckbox: HTMLInputElement | null = null;
   let historyCheckbox: HTMLInputElement | null = null;
   let insightsCheckbox: HTMLInputElement | null = null;
+  let autoTitleCheckbox: HTMLInputElement | null = null;
   let sidebarCheckboxes: { configSections: HTMLInputElement; gitPanel: HTMLInputElement; sessionHistory: HTMLInputElement; costFooter: HTMLInputElement; readinessSection: HTMLInputElement } | null = null;
   let activeRecorder: { cleanup: () => void } | null = null;
 
@@ -123,6 +124,22 @@ export function showPreferencesModal(): void {
       insightsRow.appendChild(insightsLabel);
       insightsRow.appendChild(insightsCheckbox);
       content.appendChild(insightsRow);
+
+      const autoTitleRow = document.createElement('div');
+      autoTitleRow.className = 'modal-toggle-field';
+
+      const autoTitleLabel = document.createElement('label');
+      autoTitleLabel.htmlFor = 'pref-auto-title';
+      autoTitleLabel.textContent = 'Auto-name sessions from conversation title';
+
+      autoTitleCheckbox = document.createElement('input');
+      autoTitleCheckbox.type = 'checkbox';
+      autoTitleCheckbox.id = 'pref-auto-title';
+      autoTitleCheckbox.checked = appState.preferences.autoTitleEnabled;
+
+      autoTitleRow.appendChild(autoTitleLabel);
+      autoTitleRow.appendChild(autoTitleCheckbox);
+      content.appendChild(autoTitleRow);
 
     } else if (section === 'sidebar') {
       const views = appState.preferences.sidebarViews ?? { configSections: true, gitPanel: true, sessionHistory: true, costFooter: true, readinessSection: true };
@@ -336,6 +353,9 @@ export function showPreferencesModal(): void {
     }
     if (insightsCheckbox) {
       appState.setPreference('insightsEnabled', insightsCheckbox.checked);
+    }
+    if (autoTitleCheckbox) {
+      appState.setPreference('autoTitleEnabled', autoTitleCheckbox.checked);
     }
     if (sidebarCheckboxes) {
       appState.setPreference('sidebarViews', {

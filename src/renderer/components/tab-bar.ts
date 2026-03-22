@@ -91,7 +91,7 @@ function startRename(tab: HTMLElement, project: ProjectRecord, session: SessionR
     committed = true;
     const newName = input.value.trim();
     if (newName && newName !== session.name) {
-      appState.renameSession(project.id, session.id, newName);
+      appState.renameSession(project.id, session.id, newName, true);
     } else {
       nameSpan.textContent = session.name;
     }

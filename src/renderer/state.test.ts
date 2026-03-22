@@ -467,6 +467,17 @@ describe('updateSessionCliId()', () => {
     expect(appState.activeSession!.cliSessionId).toBe('claude-abc');
     expect(mockSave).toHaveBeenCalled();
   });
+
+  it('resets userRenamed when cliSessionId changes', () => {
+    const project = addProject();
+    const session = appState.addSession(project.id, 'S1')!;
+    appState.updateSessionCliId(project.id, session.id, 'claude-abc');
+    appState.renameSession(project.id, session.id, 'Custom', true);
+    expect(appState.activeSession!.userRenamed).toBe(true);
+    // Simulate /clear: new cliSessionId
+    appState.updateSessionCliId(project.id, session.id, 'claude-xyz');
+    expect(appState.activeSession!.userRenamed).toBe(false);
+  });
 });
 
 describe('updateSessionCost()', () => {
@@ -537,6 +548,20 @@ describe('renameSession()', () => {
     appState.renameSession(project.id, session.id, 'New');
     expect(appState.activeSession!.name).toBe('New');
     expect(mockSave).toHaveBeenCalled();
+  });
+
+  it('sets userRenamed when passed true', () => {
+    const project = addProject();
+    const session = appState.addSession(project.id, 'Old')!;
+    appState.renameSession(project.id, session.id, 'Manual', true);
+    expect(appState.activeSession!.userRenamed).toBe(true);
+  });
+
+  it('does not set userRenamed when param omitted', () => {
+    const project = addProject();
+    const session = appState.addSession(project.id, 'Old')!;
+    appState.renameSession(project.id, session.id, 'Auto');
+    expect(appState.activeSession!.userRenamed).toBeUndefined();
   });
 });
 
