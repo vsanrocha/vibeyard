@@ -1,4 +1,4 @@
-import type { ClaudeIdeApi } from './types.js';
+import type { VibeyardApi } from './types.js';
 import type { SessionRecord, ProjectRecord, Preferences, PersistedState, ArchivedSession, ProviderId, CostInfo, ContextWindowInfo, InitialContextSnapshot, ReadinessResult } from '../shared/types.js';
 import { getCost, restoreCost } from './session-cost.js';
 import { restoreContext } from './session-context.js';
@@ -9,7 +9,7 @@ export const MAX_SESSION_NAME_LENGTH = 60;
 
 declare global {
   interface Window {
-    claudeIde: ClaudeIdeApi;
+    vibeyard: VibeyardApi;
   }
 }
 
@@ -57,7 +57,7 @@ class AppState {
   }
 
   async load(): Promise<void> {
-    const loaded = (await window.claudeIde.store.load()) as PersistedState | null;
+    const loaded = (await window.vibeyard.store.load()) as PersistedState | null;
     if (loaded && loaded.version === 1) {
       this.state = loaded;
       // Merge defaults for forward compatibility with old state files
@@ -78,7 +78,7 @@ class AppState {
   }
 
   private persist(): void {
-    window.claudeIde.store.save(this.state);
+    window.vibeyard.store.save(this.state);
   }
 
   get projects(): ProjectRecord[] {

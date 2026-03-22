@@ -35,8 +35,8 @@ Three renderer modules (`session-cost.ts`, `session-activity.ts`, `session-conte
 
 Three-process Electron architecture with strict context isolation:
 
-- **Main process** (`src/main/`) — Node.js side: window creation, PTY lifecycle via `node-pty`, filesystem access, persistent state (`~/.ccide/state.json`). IPC handlers in `ipc-handlers.ts` dispatch to `pty-manager.ts` and `store.ts`. CLI tool behavior is abstracted via the provider system (`src/main/providers/`).
-- **Preload** (`src/preload/preload.ts`) — Secure bridge exposing `window.claudeIde` API via `contextBridge` with namespaces: `pty`, `session`, `store`, `fs`, `provider`, `menu`.
+- **Main process** (`src/main/`) — Node.js side: window creation, PTY lifecycle via `node-pty`, filesystem access, persistent state (`~/.vibeyard/state.json`). IPC handlers in `ipc-handlers.ts` dispatch to `pty-manager.ts` and `store.ts`. CLI tool behavior is abstracted via the provider system (`src/main/providers/`).
+- **Preload** (`src/preload/preload.ts`) — Secure bridge exposing `window.vibeyard` API via `contextBridge` with namespaces: `pty`, `session`, `store`, `fs`, `provider`, `menu`.
 - **Renderer** (`src/renderer/`) — Vanilla TypeScript DOM UI (no framework). `AppState` singleton in `state.ts` uses an event emitter pattern; components in `components/` subscribe to state changes.
 
 ### Data Flow
@@ -58,14 +58,14 @@ CLI-specific behavior is encapsulated behind a `CliProvider` interface (`src/mai
 ### Key Components
 
 - `terminal-pane.ts` — xterm.js wrapper per session, handles PTY data streaming and WebGL rendering with software fallback
-- `state.ts` — Reactive AppState singleton; debounced persistence (300ms) to `~/.ccide/state.json`
+- `state.ts` — Reactive AppState singleton; debounced persistence (300ms) to `~/.vibeyard/state.json`
 - `split-layout.ts` — Manages tab mode (single terminal) vs split mode (side-by-side)
 - `session-activity.ts` — Tracks working/waiting/idle status with debounced transitions
 - `session-cost.ts` — Structured cost tracking via Claude CLI status line (`CLAUDE_CODE_STATUSLINE` env var), with regex fallback for older CLI versions. Provides per-session and aggregate cost data (USD, tokens, cache, duration)
 
 ### State Persistence
 
-App state (projects, sessions, layout) persists to `~/.ccide/state.json` via the main process store. Saves are debounced and flushed on quit. Sessions track `cliSessionId` for CLI session resume capability. Legacy `claudeSessionId` fields are auto-migrated on load.
+App state (projects, sessions, layout) persists to `~/.vibeyard/state.json` via the main process store. Saves are debounced and flushed on quit. Sessions track `cliSessionId` for CLI session resume capability. Legacy `claudeSessionId` fields are auto-migrated on load.
 
 ## Post-Implementation
 

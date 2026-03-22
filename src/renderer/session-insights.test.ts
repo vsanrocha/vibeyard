@@ -2,9 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { captureInitialContext, markFreshSession, onAlert, dismissInsight, _resetForTesting } from './session-insights.js';
 import { appState, _resetForTesting as resetState } from './state.js';
 
-// Mock the window.claudeIde API
+// Mock the window.vibeyard API
 vi.stubGlobal('window', {
-  claudeIde: {
+  vibeyard: {
     store: { load: vi.fn().mockResolvedValue(null), save: vi.fn() },
   },
 });

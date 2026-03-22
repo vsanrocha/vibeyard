@@ -159,7 +159,7 @@ function getEnabledPlugins(): Set<string> {
   return new Set(Object.entries(enabled).filter(([, v]) => v).map(([k]) => k));
 }
 
-const HOOK_MARKER = '# ccide-hook';
+const HOOK_MARKER = '# vibeyard-hook';
 
 interface HookHandler {
   type: string;
@@ -192,7 +192,7 @@ export function installHooks(): void {
 
   const existingHooks: HooksConfig = (settings.hooks ?? {}) as HooksConfig;
 
-  // Remove any previously-installed ccide hooks from all event types
+  // Remove any previously-installed vibeyard hooks from all event types
   const cleaned: HooksConfig = {};
   for (const [event, matchers] of Object.entries(existingHooks)) {
     const filteredMatchers = matchers

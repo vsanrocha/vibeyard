@@ -94,7 +94,7 @@ export function promptNewProject(): void {
       label: 'Path', id: 'project-path', placeholder: '/path/to/project',
       buttonLabel: 'Browse',
       onButtonClick: async (input) => {
-        const dir = await window.claudeIde.fs.browseDirectory();
+        const dir = await window.vibeyard.fs.browseDirectory();
         if (!dir) return;
         input.value = dir;
         const nameInput = document.getElementById('modal-project-name') as HTMLInputElement | null;
@@ -108,7 +108,7 @@ export function promptNewProject(): void {
     const path = values['project-path']?.trim();
     if (!name || !path) return;
 
-    const isDir = await window.claudeIde.fs.isDirectory(path);
+    const isDir = await window.vibeyard.fs.isDirectory(path);
     if (!isDir) {
       setModalError('project-path', 'Directory does not exist');
       return;

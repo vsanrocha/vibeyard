@@ -52,7 +52,7 @@ async function searchFiles(): Promise<void> {
 
   const query = input.value;
   try {
-    results = await window.claudeIde.fs.listFiles(project.path, query);
+    results = await window.vibeyard.fs.listFiles(project.path, query);
   } catch {
     results = [];
   }

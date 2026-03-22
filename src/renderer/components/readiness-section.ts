@@ -48,7 +48,7 @@ async function runScan(): Promise<void> {
   render();
 
   try {
-    const result = await window.claudeIde.readiness.analyze(project.path);
+    const result = await window.vibeyard.readiness.analyze(project.path);
     appState.setProjectReadiness(project.id, result);
   } catch (err) {
     console.warn('Readiness scan failed:', err);

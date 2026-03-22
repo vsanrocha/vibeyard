@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as os from 'os';
 import { BrowserWindow } from 'electron';
 
-export const STATUS_DIR = path.join(os.tmpdir(), 'ccide');
+export const STATUS_DIR = path.join(os.tmpdir(), 'vibeyard');
 const STATUSLINE_SCRIPT = path.join(STATUS_DIR, 'statusline.sh');
 
 const KNOWN_EXTENSIONS = ['.status', '.sessionid', '.cost', '.toolfailure'];

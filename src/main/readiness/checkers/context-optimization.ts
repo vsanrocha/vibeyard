@@ -22,17 +22,17 @@ const DEFAULT_SCAN_IGNORE = [
   '*.generated.*',
 ];
 
-const CCIDEIGNORE_HEADER = `# Files and patterns to exclude from AI readiness large-file scanning.
+const VIBEYARDIGNORE_HEADER = `# Files and patterns to exclude from AI readiness large-file scanning.
 # One pattern per line. Supports glob syntax (e.g. *.min.js, src/**/*.generated.ts).
 # Lines starting with # are comments.
 
 `;
 
-function ensureCcideignore(projectPath: string): void {
-  const filePath = path.join(projectPath, '.ccideignore');
+function ensureVibeyardignore(projectPath: string): void {
+  const filePath = path.join(projectPath, '.vibeyardignore');
   if (fileExists(filePath)) return;
   try {
-    fs.writeFileSync(filePath, CCIDEIGNORE_HEADER + DEFAULT_SCAN_IGNORE.join('\n') + '\n', 'utf-8');
+    fs.writeFileSync(filePath, VIBEYARDIGNORE_HEADER + DEFAULT_SCAN_IGNORE.join('\n') + '\n', 'utf-8');
   } catch {
     // Ignore write errors (e.g. read-only filesystem)
   }
@@ -40,7 +40,7 @@ function ensureCcideignore(projectPath: string): void {
 
 function loadScanIgnorePatterns(projectPath: string): string[] {
   const patterns: string[] = [];
-  const content = readFileSafe(path.join(projectPath, '.ccideignore'));
+  const content = readFileSafe(path.join(projectPath, '.vibeyardignore'));
   if (content) {
     for (const raw of content.split('\n')) {
       const line = raw.trim();
@@ -180,7 +180,7 @@ function checkLargeFiles(projectPath: string, trackedFiles: string[]): Readiness
     };
   }
 
-  ensureCcideignore(projectPath);
+  ensureVibeyardignore(projectPath);
   const ignorePatterns = loadScanIgnorePatterns(projectPath);
   const matchBasename = picomatch(ignorePatterns, { basename: true });
   const matchFullPath = picomatch(ignorePatterns);
@@ -216,14 +216,14 @@ function checkLargeFiles(projectPath: string, trackedFiles: string[]): Readiness
   if (count <= 3) {
     return {
       id: 'large-files', name: 'No extremely large files', status: 'warning',
-      description: `${count} file(s) over 5000 lines: ${largeFiles.slice(0, 3).join(', ')}. Edit .ccideignore to exclude files from scanning.`,
+      description: `${count} file(s) over 5000 lines: ${largeFiles.slice(0, 3).join(', ')}. Edit .vibeyardignore to exclude files from scanning.`,
       score: 50, maxScore: 100,
       fixPrompt: `These files are very large and may consume excessive AI context: ${largeFiles.join(', ')}. Consider splitting them into smaller, focused modules.`,
     };
   }
   return {
     id: 'large-files', name: 'No extremely large files', status: 'fail',
-    description: `${count} files over 5000 lines. Edit .ccideignore to exclude files from scanning.`,
+    description: `${count} files over 5000 lines. Edit .vibeyardignore to exclude files from scanning.`,
     score: 0, maxScore: 100,
     fixPrompt: `${count} files exceed 5000 lines: ${largeFiles.slice(0, 5).join(', ')}. Large files waste AI context and make changes harder. Refactor them into smaller, focused modules.`,
   };

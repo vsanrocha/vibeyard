@@ -10,8 +10,8 @@ All notable changes to this project will be documented in this file.
 - Collapsible sidebar with toggle button and Cmd+B shortcut
 - Cmd+F search in file-reader and diff-viewer panes
 - Cmd+Click requirement to open files from terminal links
-- .ccideignore for AI readiness large-file scan exclusions
-- AI readiness scanner with auto-created .ccideignore for large-file exclusions
+- .vibeyardignore for AI readiness large-file scan exclusions
+- AI readiness scanner with auto-created .vibeyardignore for large-file exclusions
 - Default args per project with checkbox to persist across sessions
 - Insights preferences toggle and fix-in-new-session CTA button
 - Big initial context alert when pre-context exceeds 15% of context window

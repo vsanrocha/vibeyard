@@ -13,14 +13,14 @@ beforeEach(() => {
   vi.resetAllMocks();
 });
 
-/** Mock .ccideignore auto-creation: writeFileSync captures content, readFileSync returns it after creation. */
-function mockCcideignoreAutoCreate(): void {
-  let ccideignoreContent: string | null = null;
+/** Mock .vibeyardignore auto-creation: writeFileSync captures content, readFileSync returns it after creation. */
+function mockVibeyardignoreAutoCreate(): void {
+  let vibeyardignoreContent: string | null = null;
   mockFs.writeFileSync.mockImplementation((_p: fs.PathOrFileDescriptor, data: string | NodeJS.ArrayBufferView) => {
-    if (String(_p).endsWith('.ccideignore')) ccideignoreContent = String(data);
+    if (String(_p).endsWith('.vibeyardignore')) vibeyardignoreContent = String(data);
   });
   mockFs.readFileSync.mockImplementation((p: fs.PathOrFileDescriptor) => {
-    if (String(p).endsWith('.ccideignore') && ccideignoreContent) return ccideignoreContent;
+    if (String(p).endsWith('.vibeyardignore') && vibeyardignoreContent) return vibeyardignoreContent;
     throw new Error('ENOENT');
   });
 }
@@ -183,16 +183,16 @@ describe('contextOptimizationChecker', () => {
     expect(check.status).toBe('pass');
   });
 
-  it('creates .ccideignore with default patterns when it does not exist', async () => {
+  it('creates .vibeyardignore with default patterns when it does not exist', async () => {
     mockFs.statSync.mockImplementation(() => { throw new Error('ENOENT'); });
-    mockCcideignoreAutoCreate();
+    mockVibeyardignoreAutoCreate();
     mockCountFileLines({ 'small.ts': Array(100).fill('line').join('\n') });
     mockCp.execSync.mockReturnValue('small.ts\n');
 
     await contextOptimizationChecker.analyze('/test/project');
 
     expect(mockFs.writeFileSync).toHaveBeenCalledWith(
-      expect.stringContaining('.ccideignore'),
+      expect.stringContaining('.vibeyardignore'),
       expect.stringContaining('package-lock.json'),
       'utf-8',
     );
@@ -203,13 +203,13 @@ describe('contextOptimizationChecker', () => {
     expect(writtenContent).toContain('# Files and patterns to exclude');
   });
 
-  it('does not overwrite existing .ccideignore', async () => {
+  it('does not overwrite existing .vibeyardignore', async () => {
     mockFs.readFileSync.mockImplementation((p: fs.PathOrFileDescriptor) => {
-      if (String(p).endsWith('.ccideignore')) return 'custom-pattern.ts\n';
+      if (String(p).endsWith('.vibeyardignore')) return 'custom-pattern.ts\n';
       throw new Error('ENOENT');
     });
     mockFs.statSync.mockImplementation((p: fs.PathLike) => {
-      if (String(p).endsWith('.ccideignore')) return { isFile: () => true } as fs.Stats;
+      if (String(p).endsWith('.vibeyardignore')) return { isFile: () => true } as fs.Stats;
       throw new Error('ENOENT');
     });
     mockFs.writeFileSync.mockImplementation(() => {});
@@ -221,18 +221,18 @@ describe('contextOptimizationChecker', () => {
     expect(mockFs.writeFileSync).not.toHaveBeenCalled();
   });
 
-  it('loads patterns solely from .ccideignore file', async () => {
-    // .ccideignore exists with only one pattern — default patterns should NOT be included
+  it('loads patterns solely from .vibeyardignore file', async () => {
+    // .vibeyardignore exists with only one pattern — default patterns should NOT be included
     mockFs.readFileSync.mockImplementation((p: fs.PathOrFileDescriptor) => {
-      if (String(p).endsWith('.ccideignore')) return 'custom-only.json\n';
+      if (String(p).endsWith('.vibeyardignore')) return 'custom-only.json\n';
       throw new Error('ENOENT');
     });
     mockFs.statSync.mockImplementation((p: fs.PathLike) => {
-      if (String(p).endsWith('.ccideignore')) return { isFile: () => true } as fs.Stats;
+      if (String(p).endsWith('.vibeyardignore')) return { isFile: () => true } as fs.Stats;
       throw new Error('ENOENT');
     });
     mockFs.writeFileSync.mockImplementation(() => {});
-    // package-lock.json is NOT in the .ccideignore, so it should be scanned
+    // package-lock.json is NOT in the .vibeyardignore, so it should be scanned
     mockCountFileLines({ 'package-lock.json': Array(20000).fill('{}').join('\n') });
     mockCp.execSync.mockReturnValue('package-lock.json\n');
 
@@ -245,19 +245,19 @@ describe('contextOptimizationChecker', () => {
 
   it('detects large files', async () => {
     mockFs.statSync.mockImplementation(() => { throw new Error('ENOENT'); });
-    mockCcideignoreAutoCreate();
+    mockVibeyardignoreAutoCreate();
     mockCountFileLines({ 'big.ts': Array(6000).fill('line').join('\n') });
     mockCp.execSync.mockReturnValue('big.ts\nsmall.ts\n');
 
     const result = await contextOptimizationChecker.analyze('/test/project');
     const check = result.checks.find(c => c.id === 'large-files')!;
     expect(check.status).toBe('warning');
-    expect(check.description).toContain('.ccideignore');
+    expect(check.description).toContain('.vibeyardignore');
   });
 
   it('passes when no large files found', async () => {
     mockFs.statSync.mockImplementation(() => { throw new Error('ENOENT'); });
-    mockCcideignoreAutoCreate();
+    mockVibeyardignoreAutoCreate();
     mockCountFileLines({ 'small.ts': Array(100).fill('line').join('\n') });
     mockCp.execSync.mockReturnValue('small.ts\n');
 
@@ -266,9 +266,9 @@ describe('contextOptimizationChecker', () => {
     expect(check.status).toBe('pass');
   });
 
-  it('ignores package-lock.json via auto-created .ccideignore defaults', async () => {
+  it('ignores package-lock.json via auto-created .vibeyardignore defaults', async () => {
     mockFs.statSync.mockImplementation(() => { throw new Error('ENOENT'); });
-    mockCcideignoreAutoCreate();
+    mockVibeyardignoreAutoCreate();
     mockCountFileLines({ 'package-lock.json': Array(20000).fill('{}').join('\n') });
     mockCp.execSync.mockReturnValue('package-lock.json\n');
 
@@ -277,9 +277,9 @@ describe('contextOptimizationChecker', () => {
     expect(check.status).toBe('pass');
   });
 
-  it('ignores files matching *.min.js via auto-created .ccideignore defaults', async () => {
+  it('ignores files matching *.min.js via auto-created .vibeyardignore defaults', async () => {
     mockFs.statSync.mockImplementation(() => { throw new Error('ENOENT'); });
-    mockCcideignoreAutoCreate();
+    mockVibeyardignoreAutoCreate();
     mockCountFileLines({ 'vendor.min.js': Array(10000).fill('x').join('\n') });
     mockCp.execSync.mockReturnValue('vendor.min.js\n');
 
@@ -288,13 +288,13 @@ describe('contextOptimizationChecker', () => {
     expect(check.status).toBe('pass');
   });
 
-  it('applies custom .ccideignore patterns', async () => {
+  it('applies custom .vibeyardignore patterns', async () => {
     mockFs.readFileSync.mockImplementation((p: fs.PathOrFileDescriptor) => {
-      if (String(p).endsWith('.ccideignore')) return 'generated-data.json\n';
+      if (String(p).endsWith('.vibeyardignore')) return 'generated-data.json\n';
       throw new Error('ENOENT');
     });
     mockFs.statSync.mockImplementation((p: fs.PathLike) => {
-      if (String(p).endsWith('.ccideignore')) return { isFile: () => true } as fs.Stats;
+      if (String(p).endsWith('.vibeyardignore')) return { isFile: () => true } as fs.Stats;
       throw new Error('ENOENT');
     });
     mockFs.writeFileSync.mockImplementation(() => {});
@@ -306,13 +306,13 @@ describe('contextOptimizationChecker', () => {
     expect(check.status).toBe('pass');
   });
 
-  it('handles comments and blank lines in .ccideignore', async () => {
+  it('handles comments and blank lines in .vibeyardignore', async () => {
     mockFs.readFileSync.mockImplementation((p: fs.PathOrFileDescriptor) => {
-      if (String(p).endsWith('.ccideignore')) return '# ignore big data\n\ndata-dump.json\n  \n# end\n';
+      if (String(p).endsWith('.vibeyardignore')) return '# ignore big data\n\ndata-dump.json\n  \n# end\n';
       throw new Error('ENOENT');
     });
     mockFs.statSync.mockImplementation((p: fs.PathLike) => {
-      if (String(p).endsWith('.ccideignore')) return { isFile: () => true } as fs.Stats;
+      if (String(p).endsWith('.vibeyardignore')) return { isFile: () => true } as fs.Stats;
       throw new Error('ENOENT');
     });
     mockFs.writeFileSync.mockImplementation(() => {});
@@ -326,7 +326,7 @@ describe('contextOptimizationChecker', () => {
 
   it('still flags large files not matching any ignore pattern', async () => {
     mockFs.statSync.mockImplementation(() => { throw new Error('ENOENT'); });
-    mockCcideignoreAutoCreate();
+    mockVibeyardignoreAutoCreate();
     mockCountFileLines({
       'big-module.ts': Array(6000).fill('line').join('\n'),
       'package-lock.json': Array(20000).fill('{}').join('\n'),

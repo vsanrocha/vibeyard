@@ -16,13 +16,13 @@ import { DomSearchBackend } from './components/dom-search-backend.js';
 export function initKeybindings(): void {
   // Menu-based shortcuts (registered via Electron menu accelerators)
   // These handlers receive events forwarded from the main process menu
-  window.claudeIde.menu.onNewProject(() => promptNewProject());
-  window.claudeIde.menu.onNewSession(() => quickNewSession());
-  window.claudeIde.menu.onToggleSplit(() => appState.toggleSwarm());
-  window.claudeIde.menu.onNextSession(() => appState.cycleSession(1));
-  window.claudeIde.menu.onPrevSession(() => appState.cycleSession(-1));
-  window.claudeIde.menu.onGotoSession((index) => appState.gotoSession(index));
-  window.claudeIde.menu.onToggleDebug(() => toggleDebugPanel());
+  window.vibeyard.menu.onNewProject(() => promptNewProject());
+  window.vibeyard.menu.onNewSession(() => quickNewSession());
+  window.vibeyard.menu.onToggleSplit(() => appState.toggleSwarm());
+  window.vibeyard.menu.onNextSession(() => appState.cycleSession(1));
+  window.vibeyard.menu.onPrevSession(() => appState.cycleSession(-1));
+  window.vibeyard.menu.onGotoSession((index) => appState.gotoSession(index));
+  window.vibeyard.menu.onToggleDebug(() => toggleDebugPanel());
 
   // Register shortcut handlers
   shortcutManager.registerHandler('new-session', () => quickNewSession());

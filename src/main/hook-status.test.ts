@@ -80,9 +80,9 @@ describe('hook-status', () => {
     it('creates dir and writes script with mode 0o755', () => {
       installStatusLineScript();
 
-      expect(fs.mkdirSync).toHaveBeenCalledWith('/tmp/ccide', { recursive: true, mode: 0o700 });
+      expect(fs.mkdirSync).toHaveBeenCalledWith('/tmp/vibeyard', { recursive: true, mode: 0o700 });
       expect(fs.writeFileSync).toHaveBeenCalledWith(
-        '/tmp/ccide/statusline.sh',
+        '/tmp/vibeyard/statusline.sh',
         expect.stringContaining('#!/bin/sh'),
         { mode: 0o755 },
       );
@@ -94,8 +94,8 @@ describe('hook-status', () => {
       const win = createMockWin();
       startWatching(win);
 
-      expect(fs.mkdirSync).toHaveBeenCalledWith('/tmp/ccide', { recursive: true, mode: 0o700 });
-      expect(fs.watch).toHaveBeenCalledWith('/tmp/ccide', expect.any(Function));
+      expect(fs.mkdirSync).toHaveBeenCalledWith('/tmp/vibeyard', { recursive: true, mode: 0o700 });
+      expect(fs.watch).toHaveBeenCalledWith('/tmp/vibeyard', expect.any(Function));
     });
   });
 
@@ -151,7 +151,7 @@ describe('hook-status', () => {
       watchCallback!('change', 'abc123-xyzabc.toolfailure');
 
       expect(mockSend).toHaveBeenCalledWith('session:toolFailure', 'abc123', failureData);
-      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/ccide/abc123-xyzabc.toolfailure');
+      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/vibeyard/abc123-xyzabc.toolfailure');
     });
 
     it('.toolfailure extracts session ID from filename with random suffix', () => {
@@ -173,7 +173,7 @@ describe('hook-status', () => {
       watchCallback!('change', 'abc123-xyzabc.toolfailure');
 
       expect(mockSend).not.toHaveBeenCalled();
-      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/ccide/abc123-xyzabc.toolfailure');
+      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/vibeyard/abc123-xyzabc.toolfailure');
     });
 
     it('handles read errors gracefully', () => {
@@ -215,7 +215,7 @@ describe('hook-status', () => {
 
       watchCallback!('change', null);
 
-      expect(fs.readdirSync).toHaveBeenCalledWith('/tmp/ccide');
+      expect(fs.readdirSync).toHaveBeenCalledWith('/tmp/vibeyard');
       expect(mockSend).toHaveBeenCalledWith('session:costData', 'abc123', costData);
     });
   });
@@ -269,8 +269,8 @@ describe('hook-status', () => {
 
       restartAndResync(win);
 
-      expect(fs.watch).toHaveBeenCalledWith('/tmp/ccide', expect.any(Function));
-      expect(fs.readdirSync).toHaveBeenCalledWith('/tmp/ccide');
+      expect(fs.watch).toHaveBeenCalledWith('/tmp/vibeyard', expect.any(Function));
+      expect(fs.readdirSync).toHaveBeenCalledWith('/tmp/vibeyard');
     });
   });
 
@@ -278,10 +278,10 @@ describe('hook-status', () => {
     it('unlinks all 4 file types', () => {
       cleanupSessionStatus('sess-1');
 
-      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/ccide/sess-1.status');
-      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/ccide/sess-1.sessionid');
-      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/ccide/sess-1.cost');
-      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/ccide/sess-1.toolfailure');
+      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/vibeyard/sess-1.status');
+      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/vibeyard/sess-1.sessionid');
+      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/vibeyard/sess-1.cost');
+      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/vibeyard/sess-1.toolfailure');
       expect(fs.unlinkSync).toHaveBeenCalledTimes(4);
     });
 
@@ -362,12 +362,12 @@ describe('hook-status', () => {
       cleanupAll();
 
       expect(mockClose).toHaveBeenCalled();
-      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/ccide/a.status');
-      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/ccide/b.sessionid');
-      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/ccide/c.cost');
+      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/vibeyard/a.status');
+      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/vibeyard/b.sessionid');
+      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/vibeyard/c.cost');
       // statusline.sh removal
-      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/ccide/statusline.sh');
-      expect(fs.rmdirSync).toHaveBeenCalledWith('/tmp/ccide');
+      expect(fs.unlinkSync).toHaveBeenCalledWith('/tmp/vibeyard/statusline.sh');
+      expect(fs.rmdirSync).toHaveBeenCalledWith('/tmp/vibeyard');
       // 'other.log' should not be unlinked (3 matching + 1 script = 4)
       expect(fs.unlinkSync).toHaveBeenCalledTimes(4);
     });

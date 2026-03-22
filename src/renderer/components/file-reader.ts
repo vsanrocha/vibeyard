@@ -58,7 +58,7 @@ async function loadFile(instance: FileReaderInstance): Promise<void> {
     const fullPath = instance.filePath.startsWith('/')
       ? instance.filePath
       : `${project.path}/${instance.filePath}`;
-    const content = await window.claudeIde.fs.readFile(fullPath);
+    const content = await window.vibeyard.fs.readFile(fullPath);
     body.innerHTML = '';
     body.appendChild(renderFileContent(content));
     instance.loaded = true;

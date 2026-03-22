@@ -70,7 +70,7 @@ function ensureShell(projectId: string, projectPath: string): ShellTerminalInsta
   };
 
   terminal.onData((data) => {
-    window.claudeIde.pty.write(sessionId, data);
+    window.vibeyard.pty.write(sessionId, data);
   });
 
   shells.set(projectId, instance);
@@ -85,7 +85,7 @@ async function spawnShell(instance: ShellTerminalInstance, projectPath: string):
   const overlay = instance.element.querySelector('.terminal-exit-overlay');
   if (overlay) overlay.remove();
 
-  await window.claudeIde.pty.createShell(instance.sessionId, projectPath);
+  await window.vibeyard.pty.createShell(instance.sessionId, projectPath);
 }
 
 function showPanel(projectId: string): void {
@@ -147,7 +147,7 @@ function fitShellTerminal(projectId: string): void {
   try {
     instance.fitAddon.fit();
     const { cols, rows } = instance.terminal;
-    window.claudeIde.pty.resize(instance.sessionId, cols, rows);
+    window.vibeyard.pty.resize(instance.sessionId, cols, rows);
   } catch {
     // not visible yet
   }
@@ -210,7 +210,7 @@ function isShellSessionId(sessionId: string): boolean {
 function destroyShell(projectId: string): void {
   const instance = shells.get(projectId);
   if (!instance) return;
-  window.claudeIde.pty.kill(instance.sessionId);
+  window.vibeyard.pty.kill(instance.sessionId);
   instance.terminal.dispose();
   instance.element.remove();
   shells.delete(projectId);

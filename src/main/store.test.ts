@@ -98,7 +98,7 @@ describe('saveState', () => {
     vi.advanceTimersByTime(300);
 
     expect(mockMkdirSync).toHaveBeenCalledWith(
-      expect.stringContaining('.ccide'),
+      expect.stringContaining('.vibeyard'),
       { recursive: true },
     );
   });

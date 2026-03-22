@@ -110,10 +110,10 @@ export class ClaudeProvider implements CliProvider {
       ok: false,
       message:
         'Claude CLI not found.\n\n' +
-        'CCide requires the Claude Code CLI to be installed.\n\n' +
+        'Vibeyard requires the Claude Code CLI to be installed.\n\n' +
         'Install it with:\n' +
         '  npm install -g @anthropic-ai/claude-code\n\n' +
-        'After installing, restart CCide.',
+        'After installing, restart Vibeyard.',
     };
   }
 

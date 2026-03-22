@@ -1,13 +1,13 @@
 ---
 name: Bug Report
-about: Report a bug to help us improve CCIDE
+about: Report a bug to help us improve Vibeyard
 title: ''
 labels: bug
 ---
 
 **Environment**
 - OS: (e.g., macOS 15.3, Ubuntu 24.04)
-- CCIDE version: (from title bar or package.json)
+- Vibeyard version: (from title bar or package.json)
 - Claude Code CLI version: (`claude --version`)
 
 **Describe the bug**

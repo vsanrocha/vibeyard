@@ -5,7 +5,7 @@ import type { PersistedState } from '../shared/types';
 
 export type { SessionRecord, ProjectRecord, Preferences, PersistedState } from '../shared/types';
 
-const STATE_DIR = path.join(os.homedir(), '.ccide');
+const STATE_DIR = path.join(os.homedir(), '.vibeyard');
 const STATE_FILE = path.join(STATE_DIR, 'state.json');
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;

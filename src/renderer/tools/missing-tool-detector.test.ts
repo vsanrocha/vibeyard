@@ -4,7 +4,7 @@ import { appState, _resetForTesting as resetState } from '../state.js';
 import type { ToolFailureData } from '../../shared/types.js';
 
 vi.stubGlobal('window', {
-  claudeIde: {
+  vibeyard: {
     store: { load: vi.fn().mockResolvedValue(null), save: vi.fn() },
     session: { onToolFailure: vi.fn() },
   },

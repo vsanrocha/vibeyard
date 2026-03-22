@@ -149,7 +149,7 @@ function renderStats(container: HTMLElement, stats: StatsCache): void {
     refreshBtn.textContent = 'Loading...';
     refreshBtn.disabled = true;
     try {
-      const fresh = await window.claudeIde.stats.getCache();
+      const fresh = await window.vibeyard.stats.getCache();
       container.innerHTML = '';
       if (fresh) {
         renderStats(container, fresh);
@@ -217,7 +217,7 @@ export async function showUsageModal(): Promise<void> {
 
   // Load stats
   try {
-    const stats = await window.claudeIde.stats.getCache();
+    const stats = await window.vibeyard.stats.getCache();
     content.innerHTML = '';
     if (stats) {
       renderStats(content, stats);

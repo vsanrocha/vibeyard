@@ -204,7 +204,7 @@ async function loadFiles(body: HTMLElement, gitPath: string): Promise<void> {
 
   let files: GitFileEntry[];
   try {
-    files = await window.claudeIde.git.getFiles(gitPath) as GitFileEntry[];
+    files = await window.vibeyard.git.getFiles(gitPath) as GitFileEntry[];
   } catch {
     body.innerHTML = '';
     lastFilesKey = '';

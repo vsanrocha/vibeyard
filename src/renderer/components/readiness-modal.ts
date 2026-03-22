@@ -37,7 +37,7 @@ function handleFix(check: ReadinessCheck): void {
   if (pendingActionTimer !== null) clearTimeout(pendingActionTimer);
   pendingActionTimer = setTimeout(() => {
     pendingActionTimer = null;
-    window.claudeIde.pty.write(session.id, check.fixPrompt + '\r');
+    window.vibeyard.pty.write(session.id, check.fixPrompt + '\r');
   }, 2000);
 }
 

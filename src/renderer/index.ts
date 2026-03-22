@@ -26,11 +26,11 @@ import { initToolDetector } from './tools/missing-tool-detector.js';
 import { initToolAlert } from './components/tool-alert.js';
 
 let isQuitting = false;
-window.claudeIde.app.onQuitting(() => { isQuitting = true; });
+window.vibeyard.app.onQuitting(() => { isQuitting = true; });
 
 async function main(): Promise<void> {
   // Wire PTY data/exit events from main process
-  window.claudeIde.pty.onData((sessionId, data) => {
+  window.vibeyard.pty.onData((sessionId, data) => {
     if (isShellSessionId(sessionId)) {
       handleShellPtyData(sessionId, data);
     } else if (!isMcpSession(sessionId)) {
@@ -45,7 +45,7 @@ async function main(): Promise<void> {
     }
   });
 
-  window.claudeIde.session.onCostData((sessionId, costData) => {
+  window.vibeyard.session.onCostData((sessionId, costData) => {
     logDebugEvent('costData', sessionId, costData);
     setCostData(sessionId, costData);
     setContextData(sessionId, costData.context_window);
@@ -62,12 +62,12 @@ async function main(): Promise<void> {
     appState.updateSessionContext(sessionId, info);
   });
 
-  window.claudeIde.session.onHookStatus((sessionId, status) => {
+  window.vibeyard.session.onHookStatus((sessionId, status) => {
     logDebugEvent('hookStatus', sessionId, status);
     setHookStatus(sessionId, status);
   });
 
-  window.claudeIde.session.onCliSessionId((sessionId, cliSessionId) => {
+  window.vibeyard.session.onCliSessionId((sessionId, cliSessionId) => {
     logDebugEvent('cliSessionId', sessionId, cliSessionId);
     // Find the project containing this session and persist the CLI session ID
     const project = appState.projects.find(p => p.sessions.some(s => s.id === sessionId));
@@ -77,7 +77,7 @@ async function main(): Promise<void> {
     }
   });
 
-  window.claudeIde.pty.onExit((sessionId, exitCode) => {
+  window.vibeyard.pty.onExit((sessionId, exitCode) => {
     logDebugEvent('ptyExit', sessionId, { exitCode });
     if (isShellSessionId(sessionId)) {
       handleShellPtyExit(sessionId, exitCode);
@@ -111,7 +111,7 @@ async function main(): Promise<void> {
   initReadinessSection();
   startGitPolling();
 
-  window.claudeIde.menu.onUsageStats(() => showUsageModal());
+  window.vibeyard.menu.onUsageStats(() => showUsageModal());
   document.getElementById('btn-usage-stats')!.addEventListener('click', () => showUsageModal());
 
   function isMcpSession(sessionId: string): boolean {

@@ -109,7 +109,7 @@ async function refresh(): Promise<void> {
 
   let config: ClaudeConfig;
   try {
-    config = await window.claudeIde.claude.getConfig(project.path);
+    config = await window.vibeyard.claude.getConfig(project.path);
   } catch {
     container.innerHTML = '';
     return;

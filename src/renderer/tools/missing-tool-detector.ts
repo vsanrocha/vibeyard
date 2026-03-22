@@ -57,7 +57,7 @@ export function handleToolFailure(sessionId: string, data: ToolFailureData): voi
 }
 
 export function initToolDetector(): void {
-  window.claudeIde.session.onToolFailure((sessionId, data) => {
+  window.vibeyard.session.onToolFailure((sessionId, data) => {
     handleToolFailure(sessionId, data);
   });
 

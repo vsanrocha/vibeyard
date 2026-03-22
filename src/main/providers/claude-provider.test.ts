@@ -17,7 +17,7 @@ vi.mock('../pty-manager', () => ({
 }));
 
 vi.mock('../hook-status', () => ({
-  getStatusLineScriptPath: vi.fn(() => '/tmp/ccide/statusline.sh'),
+  getStatusLineScriptPath: vi.fn(() => '/tmp/vibeyard/statusline.sh'),
   installStatusLineScript: vi.fn(),
   cleanupAll: vi.fn(),
 }));

@@ -37,7 +37,7 @@ function handleFixAction(alert: ToolAlert): void {
   clearPendingAction();
   pendingActionTimer = setTimeout(() => {
     pendingActionTimer = null;
-    window.claudeIde.pty.write(session.id, prompt + '\r');
+    window.vibeyard.pty.write(session.id, prompt + '\r');
   }, 2000);
 }
 

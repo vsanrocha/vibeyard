@@ -181,7 +181,7 @@ export function showPreferencesModal(): void {
 
       const appName = document.createElement('div');
       appName.className = 'about-app-name';
-      appName.textContent = 'CCide';
+      appName.textContent = 'Vibeyard';
 
       const versionLine = document.createElement('div');
       versionLine.className = 'about-version';
@@ -200,18 +200,18 @@ export function showPreferencesModal(): void {
       updateBtn.addEventListener('click', () => {
         updateBtn.disabled = true;
         updateStatus.textContent = 'Checking...';
-        window.claudeIde.update.checkNow().then(() => {
+        window.vibeyard.update.checkNow().then(() => {
           // If no update event fires within a few seconds, show "up to date"
           const timeout = setTimeout(() => {
             updateStatus.textContent = 'You\u2019re up to date.';
             updateBtn.disabled = false;
           }, 5000);
-          const unsub = window.claudeIde.update.onAvailable((info) => {
+          const unsub = window.vibeyard.update.onAvailable((info) => {
             clearTimeout(timeout);
             updateStatus.textContent = `Update v${info.version} available — downloading...`;
             unsub();
           });
-          const unsubErr = window.claudeIde.update.onError(() => {
+          const unsubErr = window.vibeyard.update.onError(() => {
             clearTimeout(timeout);
             updateStatus.textContent = 'Update check failed.';
             updateBtn.disabled = false;
@@ -231,7 +231,7 @@ export function showPreferencesModal(): void {
       aboutDiv.appendChild(updateRow);
       content.appendChild(aboutDiv);
 
-      window.claudeIde.app.getVersion().then((ver) => {
+      window.vibeyard.app.getVersion().then((ver) => {
         versionLine.textContent = `Version: ${ver}`;
       });
     }

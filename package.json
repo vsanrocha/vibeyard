@@ -1,16 +1,16 @@
 {
-  "name": "ccide",
+  "name": "vibeyard",
   "version": "0.2.7",
   "description": "A terminal-centric IDE for AI-powered CLI tools, built on Electron",
   "author": "Eliran Tutia",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/elirantutia/ccide.git"
+    "url": "https://github.com/elirantutia/vibeyard.git"
   },
-  "homepage": "https://github.com/elirantutia/ccide",
+  "homepage": "https://github.com/elirantutia/vibeyard",
   "bugs": {
-    "url": "https://github.com/elirantutia/ccide/issues"
+    "url": "https://github.com/elirantutia/vibeyard/issues"
   },
   "keywords": [
     "electron",
@@ -39,8 +39,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "build": {
-    "appId": "com.ccide.app",
-    "productName": "CCIDE",
+    "appId": "com.vibeyard.app",
+    "productName": "Vibeyard",
     "files": [
       "dist/**/*",
       "node_modules/**/*",
@@ -64,7 +64,7 @@
     "publish": {
       "provider": "github",
       "owner": "elirantutia",
-      "repo": "ccide",
+      "repo": "vibeyard",
       "releaseType": "release"
     }
   },

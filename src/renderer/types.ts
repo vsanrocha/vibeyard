@@ -1,7 +1,7 @@
 export type { McpServer, Agent, Skill, Command, ClaudeConfig, GitWorktree, GitFileEntry, CostData, McpResult, ProviderId, CliProviderMeta, CliProviderCapabilities, StatsCache, ReadinessResult, ReadinessCategory, ReadinessCheck, ReadinessCheckStatus } from '../shared/types.js';
 import type { CostData, ClaudeConfig, GitWorktree, McpResult, ProviderId, CliProviderMeta, StatsCache, ReadinessResult } from '../shared/types.js';
 
-export interface ClaudeIdeApi {
+export interface VibeyardApi {
   pty: {
     create(sessionId: string, cwd: string, cliSessionId: string | null, isResume: boolean, extraArgs?: string, providerId?: ProviderId): Promise<void>;
     createShell(sessionId: string, cwd: string): Promise<void>;

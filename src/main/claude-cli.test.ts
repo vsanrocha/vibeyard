@@ -358,7 +358,7 @@ describe('installHooks', () => {
     expect(written.hooks.SessionStart).toBeDefined();
   });
 
-  it('preserves existing non-ccide hooks', () => {
+  it('preserves existing non-vibeyard hooks', () => {
     mockReadFileSync.mockImplementation((filePath) => {
       if (String(filePath) === '/mock/home/.claude/settings.json') {
         return JSON.stringify({
@@ -377,7 +377,7 @@ describe('installHooks', () => {
 
     const written = JSON.parse(String(mockWriteFileSync.mock.calls[0][1]));
     const promptHooks = written.hooks.UserPromptSubmit;
-    // Should have the existing user hook matcher + the new ccide matcher
+    // Should have the existing user hook matcher + the new vibeyard matcher
     expect(promptHooks.length).toBe(2);
     const userHook = promptHooks.find((m: { hooks: Array<{ command: string }> }) =>
       m.hooks.some((h: { command: string }) => h.command === 'echo user-hook')
@@ -385,14 +385,14 @@ describe('installHooks', () => {
     expect(userHook).toBeDefined();
   });
 
-  it('removes old ccide hooks before installing new ones', () => {
+  it('removes old vibeyard hooks before installing new ones', () => {
     mockReadFileSync.mockImplementation((filePath) => {
       if (String(filePath) === '/mock/home/.claude/settings.json') {
         return JSON.stringify({
           hooks: {
             Stop: [{
               matcher: '',
-              hooks: [{ type: 'command', command: 'echo waiting # ccide-hook' }],
+              hooks: [{ type: 'command', command: 'echo waiting # vibeyard-hook' }],
             }],
           },
         });
@@ -403,12 +403,12 @@ describe('installHooks', () => {
     installHooks();
 
     const written = JSON.parse(String(mockWriteFileSync.mock.calls[0][1]));
-    // The old ccide hook should be replaced, not duplicated
+    // The old vibeyard hook should be replaced, not duplicated
     const stopHooks = written.hooks.Stop;
-    const ccideHookCount = stopHooks.reduce((count: number, m: { hooks: Array<{ command: string }> }) =>
-      count + m.hooks.filter((h: { command: string }) => h.command.includes('# ccide-hook')).length, 0
+    const vibeyardHookCount = stopHooks.reduce((count: number, m: { hooks: Array<{ command: string }> }) =>
+      count + m.hooks.filter((h: { command: string }) => h.command.includes('# vibeyard-hook')).length, 0
     );
-    // Should have exactly 1 ccide hook (the freshly installed status hook)
-    expect(ccideHookCount).toBe(1);
+    // Should have exactly 1 vibeyard hook (the freshly installed status hook)
+    expect(vibeyardHookCount).toBe(1);
   });
 });

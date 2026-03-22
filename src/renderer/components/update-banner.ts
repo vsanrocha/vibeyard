@@ -34,24 +34,24 @@ export function initUpdateBanner(): void {
 
   let latestVersion = '';
 
-  window.claudeIde.update.onAvailable((info) => {
+  window.vibeyard.update.onAvailable((info) => {
     latestVersion = info.version;
     show(`Downloading update v${info.version}...`);
   });
 
-  window.claudeIde.update.onDownloadProgress((info) => {
+  window.vibeyard.update.onDownloadProgress((info) => {
     const label = latestVersion ? `v${latestVersion}` : 'update';
     show(`Downloading ${label}... ${info.percent}%`);
   });
 
-  window.claudeIde.update.onDownloaded((info) => {
+  window.vibeyard.update.onDownloaded((info) => {
     show(`Update v${info.version} ready.`, {
       label: 'Restart',
-      action: () => window.claudeIde.update.install(),
+      action: () => window.vibeyard.update.install(),
     });
   });
 
-  window.claudeIde.update.onError((info) => {
+  window.vibeyard.update.onError((info) => {
     show('Update check failed.', {
       label: 'Dismiss',
       action: () => banner.classList.add('hidden'),

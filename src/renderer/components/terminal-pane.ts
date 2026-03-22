@@ -94,7 +94,7 @@ export function createTerminalPane(
     // Send CSI u encoding for Shift+Enter so Claude CLI treats it as newline
     if (e.shiftKey && e.key === 'Enter') {
       if (e.type === 'keydown') {
-        window.claudeIde.pty.write(sessionId, '\x1b[13;2u');
+        window.vibeyard.pty.write(sessionId, '\x1b[13;2u');
       }
       e.preventDefault();
       return false;
@@ -126,7 +126,7 @@ export function createTerminalPane(
 
   // Handle user input → PTY
   terminal.onData((data) => {
-    window.claudeIde.pty.write(sessionId, data);
+    window.vibeyard.pty.write(sessionId, data);
   });
 
   // Focus tracking
@@ -165,7 +165,7 @@ export async function spawnTerminal(sessionId: string): Promise<void> {
     markFreshSession(sessionId);
   }
   initSession(sessionId);
-  await window.claudeIde.pty.create(sessionId, instance.projectPath, instance.cliSessionId, instance.isResume, instance.args, instance.providerId);
+  await window.vibeyard.pty.create(sessionId, instance.projectPath, instance.cliSessionId, instance.isResume, instance.args, instance.providerId);
   instance.isResume = true; // subsequent spawns (e.g. Restart Session) should resume
 }
 
@@ -222,7 +222,7 @@ export function fitTerminal(sessionId: string): void {
   try {
     instance.fitAddon.fit();
     const { cols, rows } = instance.terminal;
-    window.claudeIde.pty.resize(sessionId, cols, rows);
+    window.vibeyard.pty.resize(sessionId, cols, rows);
   } catch {
     // Element not yet visible
   }
@@ -267,7 +267,7 @@ export function destroyTerminal(sessionId: string): void {
   const instance = instances.get(sessionId);
   if (!instance) return;
 
-  window.claudeIde.pty.kill(sessionId);
+  window.vibeyard.pty.kill(sessionId);
   instance.terminal.dispose();
   instance.element.remove();
   instances.delete(sessionId);

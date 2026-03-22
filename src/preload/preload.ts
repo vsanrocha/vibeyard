@@ -3,7 +3,7 @@ import type { CostData, ProviderId, CliProviderMeta, StatsCache, ReadinessResult
 
 export type { CostData } from '../shared/types';
 
-export interface ClaudeIdeApi {
+export interface VibeyardApi {
   pty: {
     create(sessionId: string, cwd: string, cliSessionId: string | null, isResume: boolean, extraArgs?: string, providerId?: ProviderId): Promise<void>;
     createShell(sessionId: string, cwd: string): Promise<void>;
@@ -93,7 +93,7 @@ function onChannel(channel: string, callback: (...args: unknown[]) => void): () 
   return () => ipcRenderer.removeListener(channel, listener);
 }
 
-const api: ClaudeIdeApi = {
+const api: VibeyardApi = {
   pty: {
     create: (sessionId, cwd, cliSessionId, isResume, extraArgs, providerId) =>
       ipcRenderer.invoke('pty:create', sessionId, cwd, cliSessionId, isResume, extraArgs || '', providerId || 'claude'),
@@ -194,4 +194,4 @@ const api: ClaudeIdeApi = {
   },
 };
 
-contextBridge.exposeInMainWorld('claudeIde', api);
+contextBridge.exposeInMainWorld('vibeyard', api);

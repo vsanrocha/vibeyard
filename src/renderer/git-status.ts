@@ -32,7 +32,7 @@ let worktreePollCounter = 0;
 
 async function refreshWorktrees(projectId: string, projectPath: string): Promise<void> {
   try {
-    const worktrees = await window.claudeIde.git.getWorktrees(projectPath) as GitWorktree[];
+    const worktrees = await window.vibeyard.git.getWorktrees(projectPath) as GitWorktree[];
     const prev = worktreeCache.get(projectId);
     worktreeCache.set(projectId, worktrees);
 
@@ -55,7 +55,7 @@ async function detectSessionWorktree(sessionId: string): Promise<void> {
   if (!project) return;
 
   try {
-    const cwd = await window.claudeIde.pty.getCwd(sessionId);
+    const cwd = await window.vibeyard.pty.getCwd(sessionId);
     if (!cwd) return;
 
     const worktrees = worktreeCache.get(project.id);
@@ -101,7 +101,7 @@ async function poll(): Promise<void> {
 
     // Query git status using the resolved worktree path
     const gitPath = getActiveGitPath(project.id);
-    const status = await window.claudeIde.git.getStatus(gitPath) as GitStatus;
+    const status = await window.vibeyard.git.getStatus(gitPath) as GitStatus;
     const cacheKey = `${project.id}:${gitPath}`;
     const prev = cache.get(cacheKey);
     cache.set(cacheKey, status);

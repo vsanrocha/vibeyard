@@ -16,7 +16,7 @@ function createWindow(): void {
     height: 900,
     minWidth: 800,
     minHeight: 500,
-    title: 'CCIDE',
+    title: 'Vibeyard',
     backgroundColor: '#000000',
     webPreferences: {
       preload: path.join(__dirname, '..', '..', 'preload', 'preload', 'preload.js'),
@@ -47,7 +47,7 @@ app.whenReady().then(() => {
     const prereq = provider.validatePrerequisites();
     if (!prereq.ok) {
       if (provider.meta.id === 'claude') {
-        dialog.showErrorBox('CCIDE — Missing Prerequisite', prereq.message);
+        dialog.showErrorBox('Vibeyard — Missing Prerequisite', prereq.message);
         app.quit();
         return;
       } else {

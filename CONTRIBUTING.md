@@ -1,4 +1,4 @@
-# Contributing to CCIDE
+# Contributing to Vibeyard
 
 Thanks for your interest in contributing! Here's how to get started.
 
@@ -47,7 +47,7 @@ No lint tooling is configured yet (planned). For now:
 When filing a bug report, please include:
 
 - **OS version** (e.g., macOS 15.3)
-- **CCIDE version** (from the app's title bar or `package.json`)
+- **Vibeyard version** (from the app's title bar or `package.json`)
 - **Claude Code CLI version** (`claude --version`)
 - **Steps to reproduce**
 - **Expected vs actual behavior**

@@ -56,7 +56,7 @@ async function loadDiff(instance: FileViewerInstance): Promise<void> {
   body.appendChild(loading);
 
   try {
-    const diff = await window.claudeIde.git.getDiff(instance.worktreePath ?? project.path, instance.filePath, instance.area);
+    const diff = await window.vibeyard.git.getDiff(instance.worktreePath ?? project.path, instance.filePath, instance.area);
     body.innerHTML = '';
     body.appendChild(parseDiffLines(diff));
     instance.loaded = true;
