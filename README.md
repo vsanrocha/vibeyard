@@ -6,6 +6,8 @@ A terminal-centric IDE for AI-powered CLI tools. Manage multiple sessions, track
 
 - **Multi-session terminal management** — run multiple CLI sessions per project, each backed by a real PTY
 - **Split panes** — side-by-side terminal layout for parallel workflows
+- **Swarm mode** — grid view displaying all sessions simultaneously with unread indicators and one-click new session cells (`Cmd+\`)
+- **Missing tool alerts** — detects failed CLI tools (e.g., `gh`, `jq`) and offers one-click install via new session
 - **Session cost tracking** — per-session and aggregate cost, token, and cache usage (USD)
 - **CLI provider abstraction** — built for Claude Code today, extensible to other AI CLI tools
 - **Auto-updater** — in-app updates via GitHub Releases
