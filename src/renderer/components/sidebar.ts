@@ -72,7 +72,11 @@ function render(): void {
 
     el.addEventListener('click', (e) => {
       if ((e.target as HTMLElement).classList.contains('project-delete')) return;
-      appState.setActiveProject(project.id);
+      if (project.id === appState.activeProjectId) {
+        appState.toggleSidebar();
+      } else {
+        appState.setActiveProject(project.id);
+      }
     });
 
     el.querySelector('.project-delete')!.addEventListener('click', () => {
