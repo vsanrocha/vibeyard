@@ -1,4 +1,5 @@
 import { appState, ProjectRecord } from '../state.js';
+import { isUnread, onChange as onUnreadChange } from '../session-unread.js';
 import {
   createTerminalPane,
   attachToContainer,
@@ -46,6 +47,11 @@ export function initSplitLayout(): void {
   appState.on('session-removed', onSessionRemoved);
   appState.on('session-changed', renderLayout);
   appState.on('layout-changed', renderLayout);
+
+  onUnreadChange(() => {
+    const project = appState.activeProject;
+    if (project?.layout.mode === 'swarm') updateSwarmPaneStyles(project);
+  });
 
   // Refit on window resize
   window.addEventListener('resize', () => {
@@ -260,15 +266,19 @@ function renderSwarmMode(project: ProjectRecord): void {
 
   showPanes(project);
 
-  // Dim non-active panes
+  updateSwarmPaneStyles(project);
+  focusActivePane(project);
+}
+
+function updateSwarmPaneStyles(project: ProjectRecord): void {
   for (const paneId of project.layout.splitPanes) {
     const instance = getTerminalInstance(paneId);
     if (instance) {
-      instance.element.classList.toggle('swarm-dimmed', paneId !== project.activeSessionId);
+      const isActive = paneId === project.activeSessionId;
+      instance.element.classList.toggle('swarm-dimmed', !isActive);
+      instance.element.classList.toggle('swarm-unread', !isActive && isUnread(paneId));
     }
   }
-
-  focusActivePane(project);
 }
 
 function showEmptyState(project: ProjectRecord | undefined): void {

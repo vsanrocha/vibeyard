@@ -498,6 +498,10 @@ body.debug-panel-open #app {
   border-color: var(--pane-focus);
 }
 
+.terminal-pane.swarm-unread {
+  border-color: var(--accent);
+}
+
 .terminal-pane .xterm-wrap {
   flex: 1;
   min-height: 0;
