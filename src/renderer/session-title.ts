@@ -13,23 +13,28 @@ export function parseTitle(sessionId: string, rawData: string): void {
   if (!appState.preferences.autoTitleEnabled) return;
 
   const clean = stripAnsi(rawData);
-  const match = TITLE_RE.exec(clean);
-  if (!match) return;
 
-  const title = match[1].trim();
-  if (!title) return;
+  // Process line-by-line to avoid matching text spanning across separate separator lines
+  for (const line of clean.split('\n')) {
+    const match = TITLE_RE.exec(line);
+    if (!match) continue;
 
-  titled.add(sessionId);
+    const title = match[1].trim();
+    if (!title) continue;
 
-  // Find the session and check if user renamed it
-  for (const project of appState.projects) {
-    const session = project.sessions.find((s) => s.id === sessionId);
-    if (session) {
-      if (!session.userRenamed) {
-        appState.renameSession(project.id, sessionId, title);
+    titled.add(sessionId);
+
+    // Find the session and check if user renamed it
+    for (const project of appState.projects) {
+      const session = project.sessions.find((s) => s.id === sessionId);
+      if (session) {
+        if (!session.userRenamed) {
+          appState.renameSession(project.id, sessionId, title);
+        }
+        return;
       }
-      return;
     }
+    return;
   }
 }
 
