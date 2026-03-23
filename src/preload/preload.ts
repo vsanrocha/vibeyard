@@ -36,6 +36,7 @@ export interface VibeyardApi {
     getConfig(providerId: ProviderId, projectPath: string): Promise<unknown>;
     getMeta(providerId: ProviderId): Promise<CliProviderMeta>;
     listProviders(): Promise<CliProviderMeta[]>;
+    checkBinary(providerId?: ProviderId): Promise<{ ok: boolean; message: string }>;
   };
   /** @deprecated Use provider namespace instead */
   claude: {
@@ -61,6 +62,7 @@ export interface VibeyardApi {
   };
   app: {
     getVersion(): Promise<string>;
+    openExternal(url: string): Promise<void>;
     onQuitting(callback: () => void): () => void;
   };
   mcp: {
@@ -149,6 +151,7 @@ const api: VibeyardApi = {
     getConfig: (providerId, projectPath) => ipcRenderer.invoke('provider:getConfig', providerId, projectPath),
     getMeta: (providerId) => ipcRenderer.invoke('provider:getMeta', providerId),
     listProviders: () => ipcRenderer.invoke('provider:listProviders'),
+    checkBinary: (providerId) => ipcRenderer.invoke('provider:checkBinary', providerId || 'claude'),
   },
   claude: {
     getConfig: (projectPath) => ipcRenderer.invoke('claude:getConfig', projectPath),
@@ -177,6 +180,7 @@ const api: VibeyardApi = {
   },
   app: {
     getVersion: () => ipcRenderer.invoke('app:getVersion'),
+    openExternal: (url: string) => ipcRenderer.invoke('app:openExternal', url),
     onQuitting: (cb: () => void) => onChannel('app:quitting', cb),
   },
   mcp: {

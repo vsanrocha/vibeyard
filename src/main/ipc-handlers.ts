@@ -171,6 +171,11 @@ export function registerIpcHandlers(): void {
     return getAllProviderMetas();
   });
 
+  ipcMain.handle('provider:checkBinary', (_event, providerId: ProviderId = 'claude') => {
+    const provider = getProvider(providerId);
+    return provider.validatePrerequisites();
+  });
+
   ipcMain.handle('fs:browseDirectory', async () => {
     const win = BrowserWindow.getAllWindows()[0];
     if (!win) return null;
@@ -180,6 +185,13 @@ export function registerIpcHandlers(): void {
   });
 
   ipcMain.handle('app:getVersion', () => app.getVersion());
+  ipcMain.handle('app:openExternal', (_event, url: string) => {
+    const parsed = new URL(url);
+    if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+      throw new Error('Only HTTP(S) URLs are allowed');
+    }
+    return shell.openExternal(url);
+  });
 
   ipcMain.handle('git:getStatus', (_event, projectPath: string) => getGitStatus(projectPath));
 

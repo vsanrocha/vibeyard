@@ -10,7 +10,7 @@ const bodyEl = document.getElementById('modal-body')!;
 const btnCancel = document.getElementById('modal-cancel')!;
 const btnConfirm = document.getElementById('modal-confirm')!;
 
-type Section = 'general' | 'sidebar' | 'shortcuts' | 'about';
+type Section = 'general' | 'sidebar' | 'shortcuts' | 'setup' | 'about';
 
 export function showPreferencesModal(): void {
   titleEl.textContent = 'Preferences';
@@ -29,6 +29,7 @@ export function showPreferencesModal(): void {
     { id: 'general', label: 'General' },
     { id: 'sidebar', label: 'Sidebar' },
     { id: 'shortcuts', label: 'Shortcuts' },
+    { id: 'setup', label: 'Setup' },
     { id: 'about', label: 'About' },
   ];
 
@@ -175,6 +176,9 @@ export function showPreferencesModal(): void {
     } else if (section === 'shortcuts') {
       renderShortcutsSection(content);
 
+    } else if (section === 'setup') {
+      renderSetupSection(content);
+
     } else if (section === 'about') {
       const aboutDiv = document.createElement('div');
       aboutDiv.className = 'about-section';
@@ -226,9 +230,37 @@ export function showPreferencesModal(): void {
       updateRow.appendChild(updateBtn);
       updateRow.appendChild(updateStatus);
 
+      const linksDiv = document.createElement('div');
+      linksDiv.className = 'about-links';
+
+      const ghLink = document.createElement('a');
+      ghLink.className = 'about-link';
+      ghLink.textContent = 'GitHub';
+      ghLink.href = '#';
+      ghLink.addEventListener('click', (e) => { e.preventDefault(); window.vibeyard.app.openExternal('https://github.com/elirantutia/vibeyard'); });
+
+      const bugLink = document.createElement('a');
+      bugLink.className = 'about-link';
+      bugLink.textContent = 'Report a Bug';
+      bugLink.href = '#';
+      bugLink.addEventListener('click', (e) => { e.preventDefault(); window.vibeyard.app.openExternal('https://github.com/elirantutia/vibeyard/issues'); });
+
+      linksDiv.appendChild(ghLink);
+      linksDiv.appendChild(bugLink);
+
+      const communityDiv = document.createElement('div');
+      communityDiv.className = 'about-community';
+      communityDiv.append(
+        'Vibeyard is open source. ',
+        (() => { const a = document.createElement('a'); a.className = 'about-link'; a.href = '#'; a.textContent = 'Contribute on GitHub'; a.addEventListener('click', (e) => { e.preventDefault(); window.vibeyard.app.openExternal('https://github.com/elirantutia/vibeyard'); }); return a; })(),
+        ' \u2014 and if you find it useful, give it a star!',
+      );
+
       aboutDiv.appendChild(appName);
       aboutDiv.appendChild(versionLine);
       aboutDiv.appendChild(updateRow);
+      aboutDiv.appendChild(linksDiv);
+      aboutDiv.appendChild(communityDiv);
       content.appendChild(aboutDiv);
 
       window.vibeyard.app.getVersion().then((ver) => {
@@ -323,6 +355,171 @@ export function showPreferencesModal(): void {
       }
     }
   }
+
+  function renderCheckItem(parent: HTMLElement, opts: {
+    label: string;
+    description: string;
+    ok: boolean;
+    statusText: string;
+    helpText?: string;
+    onFix?: () => Promise<void>;
+  }) {
+    const row = document.createElement('div');
+    row.className = 'setup-check-row';
+
+    const icon = document.createElement('span');
+    icon.className = opts.ok ? 'setup-check-icon ok' : 'setup-check-icon error';
+    icon.textContent = opts.ok ? '\u2713' : '\u2717';
+
+    const info = document.createElement('div');
+    info.className = 'setup-check-info';
+
+    const title = document.createElement('div');
+    title.className = 'setup-check-label';
+    title.textContent = opts.label;
+
+    const desc = document.createElement('div');
+    desc.className = 'setup-check-desc';
+    desc.textContent = opts.description;
+
+    info.appendChild(title);
+    info.appendChild(desc);
+
+    if (!opts.ok && opts.helpText) {
+      const help = document.createElement('div');
+      help.className = 'setup-check-help';
+      help.textContent = opts.helpText;
+      info.appendChild(help);
+    }
+
+    const status = document.createElement('div');
+    status.className = opts.ok ? 'setup-check-status ok' : 'setup-check-status error';
+    status.textContent = opts.statusText;
+
+    row.appendChild(icon);
+    row.appendChild(info);
+    row.appendChild(status);
+
+    const { onFix } = opts;
+    if (onFix) {
+      const btn = document.createElement('button');
+      btn.className = 'setup-fix-btn';
+      btn.textContent = 'Fix';
+      btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        btn.textContent = 'Fixing\u2026';
+        try {
+          await onFix();
+        } catch {
+          btn.disabled = false;
+          btn.textContent = 'Fix';
+        }
+      });
+      row.appendChild(btn);
+    }
+
+    parent.appendChild(row);
+  }
+
+  async function fixAndRerender() {
+    await window.vibeyard.settings.reinstall();
+    renderSection('setup');
+  }
+
+  async function renderSetupSection(container: HTMLElement) {
+    const section = document.createElement('div');
+    section.className = 'setup-section';
+
+    const loading = document.createElement('div');
+    loading.className = 'setup-loading';
+    loading.textContent = 'Checking configuration\u2026';
+    section.appendChild(loading);
+    container.appendChild(section);
+
+    const [validation, binary] = await Promise.all([
+      window.vibeyard.settings.validate(),
+      window.vibeyard.provider.checkBinary(),
+    ]);
+
+    if (currentSection !== 'setup') return;
+
+    // Update badge from the data we already have
+    applySetupBadge(!binary.ok || validation.statusLine !== 'vibeyard' || validation.hooks !== 'complete');
+
+    section.innerHTML = '';
+
+    renderCheckItem(section, {
+      label: 'Claude Code CLI',
+      description: 'The claude binary must be installed for sessions to work.',
+      ok: binary.ok,
+      statusText: binary.ok ? 'Installed' : 'Not found',
+      helpText: binary.ok ? undefined : 'Install with: npm install -g @anthropic-ai/claude-code',
+    });
+
+    const slOk = validation.statusLine === 'vibeyard';
+    let slStatus = 'Configured';
+    if (validation.statusLine === 'missing') slStatus = 'Not configured';
+    else if (validation.statusLine === 'foreign') slStatus = 'Overwritten by another tool';
+
+    renderCheckItem(section, {
+      label: 'Status Line',
+      description: 'Required for cost tracking and context window monitoring.',
+      ok: slOk,
+      statusText: slStatus,
+      onFix: slOk ? undefined : fixAndRerender,
+    });
+
+    const hooksOk = validation.hooks === 'complete';
+    let hooksStatus = 'All hooks installed';
+    if (validation.hooks === 'missing') hooksStatus = 'No hooks installed';
+    else if (validation.hooks === 'partial') hooksStatus = 'Some hooks missing';
+
+    renderCheckItem(section, {
+      label: 'Session Hooks',
+      description: 'Required for session activity tracking.',
+      ok: hooksOk,
+      statusText: hooksStatus,
+      onFix: hooksOk ? undefined : fixAndRerender,
+    });
+
+    if (!slOk && !hooksOk) {
+      const fixAllRow = document.createElement('div');
+      fixAllRow.className = 'setup-fix-all-row';
+
+      const fixAllBtn = document.createElement('button');
+      fixAllBtn.className = 'setup-fix-btn';
+      fixAllBtn.textContent = 'Fix All';
+      fixAllBtn.addEventListener('click', async () => {
+        fixAllBtn.disabled = true;
+        fixAllBtn.textContent = 'Fixing\u2026';
+        try {
+          await fixAndRerender();
+        } catch {
+          fixAllBtn.disabled = false;
+          fixAllBtn.textContent = 'Fix All';
+        }
+      });
+
+      fixAllRow.appendChild(fixAllBtn);
+      section.appendChild(fixAllRow);
+    }
+  }
+
+  function applySetupBadge(hasIssue: boolean) {
+    const setupItem = menuItems.get('setup');
+    if (setupItem) {
+      setupItem.classList.toggle('has-badge', hasIssue);
+    }
+  }
+
+  async function updateSetupBadge() {
+    const [validation, binary] = await Promise.all([
+      window.vibeyard.settings.validate(),
+      window.vibeyard.provider.checkBinary(),
+    ]);
+    applySetupBadge(!binary.ok || validation.statusLine !== 'vibeyard' || validation.hooks !== 'complete');
+  }
+  updateSetupBadge();
 
   // Menu click handler
   menu.addEventListener('click', (e) => {
