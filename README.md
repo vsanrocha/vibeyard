@@ -18,6 +18,10 @@
 
 ---
 
+<p align="center">
+  <img src="assets/vibyard_720.gif" alt="Vibeyard Demo" width="800" />
+</p>
+
 ## Why Vibeyard?
 
 Running AI coding agents in a bare terminal gets messy fast. Vibeyard gives you a proper workspace — multi-session management, split panes, swarm mode, cost tracking, and session resume — so you can focus on building, not juggling terminals.
