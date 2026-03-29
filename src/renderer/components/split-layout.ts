@@ -44,6 +44,14 @@ import {
   showRemotePane,
   hideAllRemotePanes,
 } from './remote-terminal-pane.js';
+import {
+  createBrowserPane,
+  destroyBrowserPane,
+  showBrowserPane,
+  hideAllBrowserPanes,
+  attachBrowserToContainer,
+  getBrowserInstance,
+} from './browser-pane.js';
 import { quickNewSession } from './tab-bar.js';
 
 const container = document.getElementById('terminal-container')!;
@@ -98,6 +106,9 @@ function onSessionAdded(data: unknown): void {
   } else if (session.type === 'remote-terminal') {
     // Remote terminal pane is created by share-manager before session-added fires
     renderLayout();
+  } else if (session.type === 'browser') {
+    createBrowserPane(session.id, session.browserUrl || 'https://github.com');
+    renderLayout();
   } else {
     // Create and spawn immediately
     createTerminalPane(session.id, project.path, session.cliSessionId, !!session.cliSessionId, session.args || '', (session.providerId as import('../../shared/types').ProviderId) || 'claude', project.id);
@@ -122,6 +133,8 @@ function onSessionRemoved(data: unknown): void {
     destroyInspectorPane(sessionId);
   } else if (getRemoteTerminalInstance(sessionId)) {
     destroyRemoteTerminal(sessionId);
+  } else if (getBrowserInstance(sessionId)) {
+    destroyBrowserPane(sessionId);
   } else {
     destroyTerminal(sessionId);
   }
@@ -158,6 +171,10 @@ export function renderLayout(): void {
       }
     } else if (session.type === 'remote-terminal') {
       // Remote terminal instances are created by share-manager, skip here
+    } else if (session.type === 'browser') {
+      if (!getBrowserInstance(session.id)) {
+        createBrowserPane(session.id, session.browserUrl || 'https://github.com');
+      }
     } else {
       if (!getTerminalInstance(session.id)) {
         createTerminalPane(session.id, project.path, session.cliSessionId, !!session.cliSessionId, session.args || '', session.providerId || 'claude', project.id);
@@ -170,6 +187,7 @@ export function renderLayout(): void {
   hideAllFileViewerPanes();
   hideAllFileReaderPanes();
   hideAllRemotePanes();
+  hideAllBrowserPanes();
 
   if (project.layout.mode === 'swarm' && project.layout.splitPanes.length >= 1) {
     renderSwarmMode(project);
@@ -199,6 +217,9 @@ function attachNonCliPane(session: { id: string; type?: string; fileReaderLine?:
   } else if (session.type === 'remote-terminal') {
     attachRemoteToContainer(session.id, target);
     showRemotePane(session.id, inSplit);
+  } else if (session.type === 'browser') {
+    attachBrowserToContainer(session.id, target);
+    showBrowserPane(session.id, inSplit);
   }
 }
 

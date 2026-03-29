@@ -68,7 +68,7 @@ export interface ContextWindowInfo {
 export interface SessionRecord {
   id: string;
   name: string;
-  type?: 'claude' | 'mcp-inspector' | 'diff-viewer' | 'file-reader' | 'remote-terminal';
+  type?: 'claude' | 'mcp-inspector' | 'diff-viewer' | 'file-reader' | 'remote-terminal' | 'browser';
   providerId?: ProviderId;
   args?: string;
   cliSessionId: string | null;
@@ -80,6 +80,7 @@ export interface SessionRecord {
   worktreePath?: string;
   fileReaderPath?: string;
   fileReaderLine?: number;
+  browserUrl?: string;
   createdAt: string;
   userRenamed?: boolean;
   cost?: CostInfo;
