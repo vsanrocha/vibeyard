@@ -6,6 +6,7 @@ import { appState } from '../state.js';
 import { fitAllVisible } from './terminal-pane.js';
 import { destroySearchBar, hideSearchBar } from './search-bar.js';
 import { shortcutManager, displayKeys } from '../shortcuts.js';
+import { attachClipboardCopyHandler } from './terminal-utils.js';
 
 interface ShellTerminalInstance {
   terminal: Terminal;
@@ -66,19 +67,7 @@ function ensureShell(projectId: string, projectPath: string): ShellTerminalInsta
   const searchAddon = new SearchAddon();
   terminal.loadAddon(searchAddon);
 
-  terminal.attachCustomKeyEventHandler((e) => {
-    if ((e.metaKey || e.ctrlKey) && e.key === 'f') {
-      return false;
-    }
-    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'C') {
-      if (e.type === 'keydown') {
-        const selection = terminal.getSelection();
-        if (selection) navigator.clipboard.writeText(selection);
-      }
-      return false;
-    }
-    return true;
-  });
+  attachClipboardCopyHandler(terminal);
 
   const sessionId = shellSessionId(projectId);
 
