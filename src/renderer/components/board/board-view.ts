@@ -64,7 +64,7 @@ export function createBoardView(): HTMLElement {
   columnsContainer.className = 'board-columns';
 
   el.appendChild(header);
-  el.insertBefore(tagRow, columnsContainer);
+  el.appendChild(tagRow);
   el.appendChild(columnsContainer);
 
   return el;

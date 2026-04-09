@@ -5,7 +5,7 @@ import { getStatus } from '../../session-activity.js';
 import { showTaskModal } from './board-task-modal.js';
 import { showContextMenu } from './board-context-menu.js';
 import { showConfirmModal } from '../modal.js';
-import { injectPrompt } from '../../board-session-sync.js';
+import { setPendingPrompt } from '../terminal-pane.js';
 
 export function createCardElement(task: BoardTask): HTMLElement {
   const el = document.createElement('div');
@@ -164,9 +164,10 @@ export function runTask(task: BoardTask): void {
       if (activeCol && task.columnId !== activeCol.id) {
         moveTask(task.id, activeCol.id, 0);
       }
-      // Inject prompt into the new session (paste, don't submit)
+      // Set prompt on the terminal instance — it will be passed as a
+      // CLI startup argument when spawnTerminal runs (via requestAnimationFrame)
       if (task.prompt.trim()) {
-        injectPrompt(session.id, task.prompt);
+        setPendingPrompt(session.id, task.prompt);
       }
     }
   }

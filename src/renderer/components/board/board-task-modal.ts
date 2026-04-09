@@ -2,6 +2,7 @@ import type { BoardTask } from '../../../shared/types.js';
 import { appState } from '../../state.js';
 import { addTask, updateTask, getBoard, addTag, getTagColor } from '../../board-state.js';
 import { showModal, closeModal, setModalError, type FieldDef } from '../modal.js';
+import { runTask } from './board-card.js';
 
 export function showTaskModal(mode: 'create' | 'edit', task?: BoardTask, defaultColumnId?: string): void {
   const board = getBoard();
@@ -76,6 +77,9 @@ export function showTaskModal(mode: 'create' | 'edit', task?: BoardTask, default
 
     const notes = values.notes?.trim() ?? '';
 
+    // Ensure all tags are in the palette (assigns colors)
+    for (const t of currentTags) addTag(t);
+
     if (mode === 'create') {
       const targetColumnId = defaultColumnId ?? board.columns.find(c => c.behavior === 'inbox')?.id ?? board.columns[0]?.id;
       addTask({
@@ -95,8 +99,6 @@ export function showTaskModal(mode: 'create' | 'edit', task?: BoardTask, default
         tags: currentTags.length > 0 ? currentTags : undefined,
         ...(values.columnId ? { columnId: values.columnId } : {}),
       });
-      // Ensure new tags are in the palette
-      for (const t of currentTags) addTag(t);
     }
 
     closeModal();
@@ -187,6 +189,7 @@ export function showTaskModal(mode: 'create' | 'edit', task?: BoardTask, default
       e.stopPropagation();
       const val = tagInput.value.toLowerCase().trim();
       if (val && !currentTags.includes(val)) {
+        addTag(val); // Register in palette immediately so it gets a color
         currentTags.push(val);
         tagInput.value = '';
         autocompleteList.style.display = 'none';
@@ -209,5 +212,43 @@ export function showTaskModal(mode: 'create' | 'edit', task?: BoardTask, default
     modalBody.insertBefore(tagFieldDiv, folderField);
   } else {
     modalBody.appendChild(tagFieldDiv);
+  }
+
+  // Add Run/Resume button in edit mode
+  const footer = document.getElementById('modal-actions') as HTMLElement;
+  if (footer) {
+    // Clean up any leftover run buttons from previous modal opens
+    footer.querySelectorAll('.modal-run-btn').forEach(el => el.remove());
+
+    if (mode === 'edit' && task) {
+      const runBtn = document.createElement('button');
+      runBtn.className = 'modal-run-btn';
+      const hasActiveSession = !!task.sessionId;
+      const canResume = !hasActiveSession && !!task.cliSessionId;
+      runBtn.textContent = hasActiveSession ? 'Focus Session' : canResume ? 'Resume' : 'Run';
+      runBtn.style.cssText = 'margin-right:auto;padding:6px 14px;background:var(--accent);color:#fff;border:1px solid var(--accent);border-radius:6px;cursor:pointer;font-size:13px;';
+      runBtn.addEventListener('click', () => {
+        // Save current edits before running
+        const prompt = (document.getElementById('modal-prompt') as HTMLTextAreaElement)?.value?.trim() ?? '';
+        const taskTitle = (document.getElementById('modal-taskTitle') as HTMLInputElement)?.value?.trim() ?? '';
+        const notes = (document.getElementById('modal-notes') as HTMLTextAreaElement)?.value?.trim() ?? '';
+        const cwd = (document.getElementById('modal-cwd') as HTMLInputElement)?.value?.trim() || project.path;
+        const columnId = (document.getElementById('modal-columnId') as HTMLInputElement)?.value;
+
+        for (const t of currentTags) addTag(t);
+        updateTask(task.id, {
+          title: taskTitle || task.title,
+          prompt: prompt || task.prompt,
+          notes: notes || undefined,
+          cwd,
+          tags: currentTags.length > 0 ? currentTags : undefined,
+          ...(columnId ? { columnId } : {}),
+        });
+
+        closeModal();
+        runTask(task);
+      });
+      footer.insertBefore(runBtn, footer.firstChild);
+    }
   }
 }

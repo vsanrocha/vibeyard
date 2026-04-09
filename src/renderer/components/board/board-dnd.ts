@@ -2,30 +2,28 @@ import { moveTask } from '../../board-state.js';
 
 let isDragging = false;
 let dragTaskId: string | null = null;
-let dragSourceColumnId: string | null = null;
-let dragSourceOrder: number = -1;
 let ghostEl: HTMLElement | null = null;
 let startX = 0;
 let startY = 0;
 const DRAG_THRESHOLD = 5;
 let pointerStarted = false;
-let capturedPointerId: number | null = null;
 let onDragEnd: (() => void) | null = null;
+let activeDropTarget: HTMLElement | null = null;
+let lastPointerX = 0;
+let lastPointerY = 0;
 
 const container = () => document.querySelector('.board-columns') as HTMLElement | null;
 
 export function initBoardDnd(): void {
-  document.addEventListener('pointerdown', onPointerDown);
-  document.addEventListener('pointermove', onPointerMove);
-  document.addEventListener('pointerup', onPointerUp);
-  document.addEventListener('pointercancel', onPointerCancel);
+  document.addEventListener('pointerdown', onPointerDown, true);
+  document.addEventListener('pointermove', onPointerMove, true);
+  document.addEventListener('pointerup', onPointerUp, true);
 }
 
 export function cleanupBoardDnd(): void {
-  document.removeEventListener('pointerdown', onPointerDown);
-  document.removeEventListener('pointermove', onPointerMove);
-  document.removeEventListener('pointerup', onPointerUp);
-  document.removeEventListener('pointercancel', onPointerCancel);
+  document.removeEventListener('pointerdown', onPointerDown, true);
+  document.removeEventListener('pointermove', onPointerMove, true);
+  document.removeEventListener('pointerup', onPointerUp, true);
   cancelDrag();
 }
 
@@ -38,10 +36,9 @@ export function setDragEndCallback(cb: () => void): void {
 }
 
 function onPointerDown(e: PointerEvent): void {
+  if (isDragging) return;
   const card = (e.target as HTMLElement).closest('.board-card') as HTMLElement | null;
   if (!card || !card.dataset.taskId) return;
-
-  // Don't drag if clicking a button or input
   if ((e.target as HTMLElement).closest('button, input, textarea')) return;
 
   dragTaskId = card.dataset.taskId;
@@ -49,36 +46,37 @@ function onPointerDown(e: PointerEvent): void {
   startY = e.clientY;
   pointerStarted = true;
 
-  // Record source position for same-column reorder
-  const cardsArea = card.closest('.board-column-cards') as HTMLElement | null;
-  dragSourceColumnId = cardsArea?.dataset.columnId ?? null;
-  const siblings = cardsArea ? Array.from(cardsArea.querySelectorAll('.board-card')) : [];
-  dragSourceOrder = siblings.indexOf(card);
+  // Prevent the browser from stealing the gesture (text selection, etc.)
+  e.preventDefault();
 }
 
 function onPointerMove(e: PointerEvent): void {
   if (!pointerStarted || !dragTaskId) return;
+
+  lastPointerX = e.clientX;
+  lastPointerY = e.clientY;
 
   if (!isDragging) {
     const dx = Math.abs(e.clientX - startX);
     const dy = Math.abs(e.clientY - startY);
     if (dx + dy < DRAG_THRESHOLD) return;
 
-    // Start drag
     isDragging = true;
-    capturedPointerId = e.pointerId;
-    (e.target as HTMLElement).setPointerCapture(e.pointerId);
     const card = document.querySelector(`.board-card[data-task-id="${dragTaskId}"]`) as HTMLElement;
     if (!card) { cancelDrag(); return; }
 
     card.classList.add('dragging');
 
-    // Create ghost
     ghostEl = card.cloneNode(true) as HTMLElement;
     ghostEl.classList.remove('dragging');
     ghostEl.classList.add('board-card-ghost');
     ghostEl.style.width = card.offsetWidth + 'px';
     document.body.appendChild(ghostEl);
+
+    injectDropTargets(dragTaskId);
+
+    // Prevent text selection during drag
+    e.preventDefault();
   }
 
   if (ghostEl) {
@@ -86,8 +84,7 @@ function onPointerMove(e: PointerEvent): void {
     ghostEl.style.top = e.clientY - 10 + 'px';
   }
 
-  // Find drop target
-  updateDropIndicator(e.clientX, e.clientY);
+  highlightNearestTarget(e.clientX, e.clientY);
 }
 
 function onPointerUp(e: PointerEvent): void {
@@ -96,16 +93,15 @@ function onPointerUp(e: PointerEvent): void {
     return;
   }
 
-  const drop = findDropTarget(e.clientX, e.clientY);
-  if (drop) {
-    moveTask(dragTaskId, drop.columnId, drop.order);
+  // Final position update before reading the active target
+  highlightNearestTarget(e.clientX, e.clientY);
+
+  if (activeDropTarget) {
+    const columnId = activeDropTarget.dataset.columnId!;
+    const order = parseInt(activeDropTarget.dataset.order!, 10);
+    moveTask(dragTaskId, columnId, order);
   }
 
-  cancelDrag();
-  if (onDragEnd) onDragEnd();
-}
-
-function onPointerCancel(): void {
   cancelDrag();
   if (onDragEnd) onDragEnd();
 }
@@ -116,88 +112,85 @@ function cancelDrag(): void {
     ghostEl = null;
   }
 
-  if (capturedPointerId !== null) {
-    try {
-      document.releasePointerCapture(capturedPointerId);
-    } catch { /* already released */ }
-    capturedPointerId = null;
-  }
-
+  removeDropTargets();
   document.querySelectorAll('.board-card.dragging').forEach(el => el.classList.remove('dragging'));
-  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-  document.querySelectorAll('.drop-before').forEach(el => el.classList.remove('drop-before'));
-  document.querySelectorAll('.drop-after-last').forEach(el => el.classList.remove('drop-after-last'));
 
   isDragging = false;
   dragTaskId = null;
-  dragSourceColumnId = null;
-  dragSourceOrder = -1;
   pointerStarted = false;
+  activeDropTarget = null;
 }
 
-function findColumnCardsAt(x: number, y: number): HTMLElement | null {
+/**
+ * Inject narrow drop-target strips between cards in every column.
+ * Each target stores the columnId and the order index the dragged card
+ * would receive if dropped there.
+ */
+function injectDropTargets(excludeTaskId: string): void {
   const boardColumns = container();
-  if (!boardColumns) return null;
+  if (!boardColumns) return;
 
-  // Use the full .board-column element for X hit detection (wider target)
-  const columns = boardColumns.querySelectorAll('.board-column');
-  for (const col of columns) {
-    const colRect = col.getBoundingClientRect();
-    if (x >= colRect.left && x <= colRect.right) {
-      return col.querySelector('.board-column-cards') as HTMLElement | null;
+  for (const area of boardColumns.querySelectorAll('.board-column-cards')) {
+    const columnId = (area as HTMLElement).dataset.columnId;
+    if (!columnId) continue;
+
+    const cards = Array.from(area.querySelectorAll('.board-card')) as HTMLElement[];
+    let order = 0;
+
+    // Drop target before the first non-dragged card
+    const firstTarget = createDropTarget(columnId, order);
+    area.insertBefore(firstTarget, area.firstChild);
+
+    for (const card of cards) {
+      if (card.dataset.taskId === excludeTaskId) continue;
+      order++;
+      const target = createDropTarget(columnId, order);
+      // Insert after this card (before its next sibling)
+      card.insertAdjacentElement('afterend', target);
     }
-  }
-  return null;
-}
 
-function updateDropIndicator(x: number, y: number): void {
-  // Clear previous indicators
-  document.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-  document.querySelectorAll('.drop-before').forEach(el => el.classList.remove('drop-before'));
-  document.querySelectorAll('.drop-after-last').forEach(el => el.classList.remove('drop-after-last'));
-
-  const colCards = findColumnCardsAt(x, y);
-  if (!colCards) return;
-
-  colCards.classList.add('drag-over');
-
-  // Find insertion point by comparing Y with card midpoints
-  const cards = colCards.querySelectorAll('.board-card:not(.dragging)');
-  let found = false;
-  for (const card of cards) {
-    const cardRect = card.getBoundingClientRect();
-    const midY = cardRect.top + cardRect.height / 2;
-    if (y < midY) {
-      card.classList.add('drop-before');
-      found = true;
-      break;
-    }
-  }
-
-  // If cursor is below all cards, show indicator after the last card
-  if (!found && cards.length > 0) {
-    cards[cards.length - 1].classList.add('drop-after-last');
+    // If the column is empty (only contained the dragged card), we already
+    // have the one target at order 0. If the column had no cards at all,
+    // we still have the first target.
   }
 }
 
-function findDropTarget(x: number, y: number): { columnId: string; order: number } | null {
-  const colCards = findColumnCardsAt(x, y);
-  if (!colCards) return null;
+function createDropTarget(columnId: string, order: number): HTMLElement {
+  const el = document.createElement('div');
+  el.className = 'board-drop-target';
+  el.dataset.columnId = columnId;
+  el.dataset.order = String(order);
+  return el;
+}
 
-  const columnId = colCards.dataset.columnId;
-  if (!columnId) return null;
+function removeDropTargets(): void {
+  document.querySelectorAll('.board-drop-target').forEach(el => el.remove());
+}
 
-  const cards = colCards.querySelectorAll('.board-card:not(.dragging)');
-  let order = cards.length;
+function highlightNearestTarget(x: number, y: number): void {
+  const prev = activeDropTarget;
 
-  for (let i = 0; i < cards.length; i++) {
-    const cardRect = cards[i].getBoundingClientRect();
-    const midY = cardRect.top + cardRect.height / 2;
-    if (y < midY) {
-      order = i;
-      break;
+  const targets = document.querySelectorAll('.board-drop-target');
+  let best: HTMLElement | null = null;
+  let bestDist = Infinity;
+
+  for (const t of targets) {
+    const rect = t.getBoundingClientRect();
+    // Only consider targets within reasonable horizontal range of the pointer
+    if (x < rect.left - 60 || x > rect.right + 60) continue;
+
+    const centerY = rect.top + rect.height / 2;
+    const dist = Math.abs(y - centerY);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = t as HTMLElement;
     }
   }
 
-  return { columnId, order };
+  // Only update DOM if the target actually changed
+  if (best !== prev) {
+    if (prev) prev.classList.remove('active');
+    if (best) best.classList.add('active');
+    activeDropTarget = best;
+  }
 }

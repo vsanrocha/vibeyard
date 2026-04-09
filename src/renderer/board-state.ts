@@ -53,6 +53,8 @@ export function addTask(partial: Partial<BoardTask>): BoardTask | undefined {
     order: maxOrder + 1,
     createdAt: partial.createdAt || now,
     updatedAt: now,
+    ...(partial.notes ? { notes: partial.notes } : {}),
+    ...(partial.tags && partial.tags.length > 0 ? { tags: partial.tags } : {}),
   };
 
   board.tasks.push(task);
