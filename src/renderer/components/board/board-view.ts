@@ -95,7 +95,8 @@ export function renderBoard(): void {
   columnsContainer.innerHTML = '';
 
   const tagRow = boardEl.querySelector('#board-tag-row') as HTMLElement;
-  if (tagRow) renderTagRow(tagRow, board);
+  const searchFocused = tagRow?.querySelector('.board-search-input') === document.activeElement;
+  if (tagRow && !searchFocused) renderTagRow(tagRow, board);
 
   const sortedColumns = [...board.columns].sort((a, b) => a.order - b.order);
   const tasks = board.tasks;

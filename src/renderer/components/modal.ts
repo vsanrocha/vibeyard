@@ -52,6 +52,14 @@ export function showModal(
   btnConfirm.style.borderColor = '';
   bodyEl.innerHTML = '';
 
+  // Clean up any extra buttons injected into the footer by previous modals
+  const footer = document.getElementById('modal-actions');
+  if (footer) {
+    for (const el of Array.from(footer.children)) {
+      if (el !== btnCancel && el !== btnConfirm) el.remove();
+    }
+  }
+
   for (const field of fields) {
     const div = document.createElement('div');
     div.className = field.type === 'checkbox' ? 'modal-field modal-field-checkbox' : 'modal-field';
@@ -185,6 +193,7 @@ export function showConfirmModal(
 
   showModal(title, fields, () => {
     onConfirm();
+    closeModal();
   }, { confirmLabel: label });
 
   // Replace the empty body with the message text
