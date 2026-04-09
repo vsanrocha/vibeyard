@@ -177,14 +177,16 @@ function truncate(str: string, len: number): string {
   return firstLine.length > len ? firstLine.slice(0, len) + '...' : firstLine;
 }
 
-const HOME_RE = /^\/Users\/[^/]+/;
+const HOME_RE_UNIX = /^\/Users\/[^/]+/;
+const HOME_RE_WIN = /^[A-Z]:\\Users\\[^\\]+/i;
 
 function shortenPath(path: string): string {
   if (!path) return '';
-  const home = path.replace(HOME_RE, '~');
-  const parts = home.split('/');
+  const sep = path.includes('\\') ? '\\' : '/';
+  const home = path.replace(HOME_RE_UNIX, '~').replace(HOME_RE_WIN, '~');
+  const parts = home.split(sep);
   if (parts.length > 3) {
-    return parts.slice(0, 1).concat('...', parts.slice(-2)).join('/');
+    return parts.slice(0, 1).concat('...', parts.slice(-2)).join(sep);
   }
   return home;
 }
