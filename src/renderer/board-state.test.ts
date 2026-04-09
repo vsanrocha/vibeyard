@@ -31,6 +31,7 @@ import {
   addTask, updateTask, deleteTask, moveTask,
   addColumn, renameColumn, deleteColumn, reorderColumns,
   addTag, removeTag, updateTagColor, shouldAutoInject,
+  addTagToTask, removeTagFromTask, getTagColor, getTagCount,
 } from './board-state';
 
 beforeEach(() => {
@@ -139,6 +140,12 @@ describe('board-state', () => {
       // Should not throw
       expect(getBoard()!.tasks).toHaveLength(0);
     });
+
+    it('strips invalid columnId from updates', () => {
+      const task = addTask({ title: 'Test', prompt: 'p' })!;
+      updateTask(task.id, { columnId: 'non-existent' });
+      expect(task.columnId).toBe('col-backlog'); // unchanged
+    });
   });
 
   describe('deleteTask', () => {
@@ -210,6 +217,12 @@ describe('board-state', () => {
       moveTask(task.id, 'col-running', 0);
       const tasks = getTasksForColumn('col-running');
       expect(tasks[0].id).toBe(task.id);
+    });
+
+    it('rejects move to non-existent column', () => {
+      const task = addTask({ title: 'Test', prompt: 'p' })!;
+      moveTask(task.id, 'non-existent-column', 0);
+      expect(task.columnId).toBe('col-backlog'); // unchanged
     });
   });
 
@@ -311,6 +324,48 @@ describe('board-state', () => {
       updateTagColor('feature', 'red');
       const board = getBoard()!;
       expect(board.tags![0].color).toBe('red');
+    });
+  });
+
+  describe('tag-to-task operations', () => {
+    it('adds a tag to a task and auto-creates in palette', () => {
+      const task = addTask({ title: 'Test', prompt: 'p' })!;
+      addTagToTask(task.id, 'frontend');
+      const updated = getBoard()!.tasks.find(t => t.id === task.id);
+      expect(updated!.tags).toEqual(['frontend']);
+      expect(getBoard()!.tags).toContainEqual({ name: 'frontend', color: expect.any(String) });
+    });
+
+    it('does not duplicate tags on a task', () => {
+      const task = addTask({ title: 'Test', prompt: 'p' })!;
+      addTagToTask(task.id, 'bug');
+      addTagToTask(task.id, 'bug');
+      expect(task.tags).toEqual(['bug']);
+    });
+
+    it('removes a tag from a task', () => {
+      const task = addTask({ title: 'Test', prompt: 'p' })!;
+      addTagToTask(task.id, 'bug');
+      addTagToTask(task.id, 'feature');
+      removeTagFromTask(task.id, 'bug');
+      expect(task.tags).toEqual(['feature']);
+    });
+
+    it('getTagColor returns the assigned color', () => {
+      addTag('urgent', 'red');
+      expect(getTagColor('urgent')).toBe('red');
+    });
+
+    it('getTagColor returns gray for unknown tags', () => {
+      expect(getTagColor('nonexistent')).toBe('gray');
+    });
+
+    it('getTagCount counts tasks with that tag', () => {
+      const t1 = addTask({ title: 'T1', prompt: 'p' })!;
+      const t2 = addTask({ title: 'T2', prompt: 'p' })!;
+      addTagToTask(t1.id, 'shared');
+      addTagToTask(t2.id, 'shared');
+      expect(getTagCount('shared')).toBe(2);
     });
   });
 

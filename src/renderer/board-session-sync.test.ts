@@ -114,3 +114,14 @@ describe('board-session-sync', () => {
     expect(updated!.cliSessionId).toBe('cli-abc');
   });
 });
+
+describe('injectPrompt', () => {
+  it('skips injection for empty prompt', async () => {
+    const { injectPrompt } = await import('./board-session-sync');
+    const writeSpy = vi.fn();
+    (window as any).vibeyard.pty = { write: writeSpy };
+
+    injectPrompt('session-1', '  ');
+    expect(writeSpy).not.toHaveBeenCalled();
+  });
+});
