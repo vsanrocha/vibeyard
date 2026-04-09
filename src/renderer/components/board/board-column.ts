@@ -3,6 +3,7 @@ import { renameColumn, deleteColumn, addColumn, getBoard, reorderColumns } from 
 import { createCardElement } from './board-card.js';
 import { showTaskModal } from './board-task-modal.js';
 import { showContextMenu } from './board-context-menu.js';
+import { showConfirmModal } from '../modal.js';
 
 export function createColumnElement(column: BoardColumn, tasks: BoardTask[]): HTMLElement {
   const el = document.createElement('div');
@@ -102,8 +103,7 @@ function confirmDeleteColumn(column: BoardColumn): void {
   const message = taskCount > 0
     ? `Delete column "${column.title}"? Its ${taskCount} task(s) will be moved to Backlog.`
     : `Delete column "${column.title}"?`;
-  if (!confirm(message)) return;
-  deleteColumn(column.id);
+  showConfirmModal('Delete Column', message, () => deleteColumn(column.id));
 }
 
 function startInlineRename(titleSpan: HTMLElement, column: BoardColumn): void {

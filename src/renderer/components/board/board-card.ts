@@ -4,6 +4,7 @@ import { getColumnByBehavior, updateTask, moveTask, deleteTask } from '../../boa
 import { getStatus, type SessionStatus } from '../../session-activity.js';
 import { showTaskModal } from './board-task-modal.js';
 import { showContextMenu } from './board-context-menu.js';
+import { showConfirmModal } from '../modal.js';
 
 export function createCardElement(task: BoardTask): HTMLElement {
   const el = document.createElement('div');
@@ -76,8 +77,11 @@ export function createCardElement(task: BoardTask): HTMLElement {
 
 function confirmDeleteTask(task: BoardTask): void {
   const label = task.title || task.prompt.slice(0, 40) || 'this task';
-  if (!confirm(`Delete "${label}"? This cannot be undone.`)) return;
-  deleteTask(task.id);
+  showConfirmModal(
+    'Delete Task',
+    `Are you sure you want to delete "${label}"? This cannot be undone.`,
+    () => deleteTask(task.id),
+  );
 }
 
 function createStatusElement(status: SessionStatus, sessionId: string): HTMLElement {

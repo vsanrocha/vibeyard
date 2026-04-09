@@ -28,6 +28,7 @@
   color: var(--text-secondary);
   font-size: 12px;
   cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
 }
 .board-add-task:hover {
   border-color: var(--accent);
@@ -67,7 +68,7 @@
 }
 
 .board-column[data-behavior="active"] .board-column-header {
-  color: #34d399;
+  color: var(--status-working, #34d399);
 }
 
 .column-title {
@@ -114,6 +115,7 @@
   border-radius: 6px;
   margin: 8px;
   background: transparent;
+  transition: border-color 0.15s, color 0.15s;
 }
 .board-column-add:hover {
   border-color: var(--accent);
@@ -131,6 +133,7 @@
 }
 .board-card:hover {
   border-color: var(--text-muted);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 .board-card.dragging {
   opacity: 0.4;
@@ -189,11 +192,11 @@
   height: 6px;
   border-radius: 50%;
 }
-.card-status-dot.working { background: #34d399; }
-.card-status-dot.waiting { background: #fbbf24; }
-.card-status-dot.prompt-waiting { background: #fbbf24; }
-.card-status-dot.idle { background: #60a5fa; }
-.card-status-dot.completed { background: #666; }
+.card-status-dot.working { background: var(--status-working, #34d399); }
+.card-status-dot.waiting { background: var(--status-waiting, #fbbf24); }
+.card-status-dot.prompt-waiting { background: var(--status-waiting, #fbbf24); }
+.card-status-dot.idle { background: var(--status-idle, #60a5fa); }
+.card-status-dot.completed { background: var(--text-muted); }
 
 /* Done column cards are slightly dimmed */
 .board-column[data-behavior="terminal"] .board-card {

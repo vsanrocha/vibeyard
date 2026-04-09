@@ -172,3 +172,33 @@ function cleanup(): void {
   }
 }
 
+export function showConfirmModal(
+  title: string,
+  message: string,
+  onConfirm: () => void,
+  options?: { confirmLabel?: string; danger?: boolean }
+): void {
+  const label = options?.confirmLabel ?? 'Delete';
+  const fields: FieldDef[] = [];
+
+  showModal(title, fields, () => {
+    onConfirm();
+    closeModal();
+  }, { confirmLabel: label });
+
+  // Replace the empty body with the message text
+  const bodyEl = document.getElementById('modal-body')!;
+  bodyEl.innerHTML = '';
+  const msgEl = document.createElement('p');
+  msgEl.style.cssText = 'font-size:13px;color:var(--text-secondary);margin:0;line-height:1.5;';
+  msgEl.textContent = message;
+  bodyEl.appendChild(msgEl);
+
+  // Style the confirm button as danger if requested
+  if (options?.danger !== false) {
+    const btnConfirm = document.getElementById('modal-confirm')!;
+    btnConfirm.style.background = 'var(--accent)';
+    btnConfirm.style.borderColor = 'var(--accent)';
+  }
+}
+

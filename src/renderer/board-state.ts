@@ -65,6 +65,9 @@ export function updateTask(taskId: string, updates: Partial<BoardTask>): void {
   if (!board) return;
   const task = board.tasks.find(t => t.id === taskId);
   if (!task) return;
+  if (updates.columnId && !board.columns.some(c => c.id === updates.columnId)) {
+    delete updates.columnId;
+  }
   Object.assign(task, updates, { updatedAt: Date.now() });
   appState.notifyBoardChanged();
 }
@@ -91,6 +94,7 @@ export function moveTask(taskId: string, toColumnId: string, toOrder: number): v
   if (!board) return;
   const task = board.tasks.find(t => t.id === taskId);
   if (!task) return;
+  if (!board.columns.some(c => c.id === toColumnId)) return;
 
   const fromColumnId = task.columnId;
 
