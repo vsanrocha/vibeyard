@@ -48,6 +48,8 @@ export function showModal(
 ): void {
   titleEl.textContent = title;
   btnConfirm.textContent = options?.confirmLabel ?? 'Create';
+  btnConfirm.style.background = '';
+  btnConfirm.style.borderColor = '';
   bodyEl.innerHTML = '';
 
   for (const field of fields) {
@@ -183,11 +185,9 @@ export function showConfirmModal(
 
   showModal(title, fields, () => {
     onConfirm();
-    closeModal();
   }, { confirmLabel: label });
 
   // Replace the empty body with the message text
-  const bodyEl = document.getElementById('modal-body')!;
   bodyEl.innerHTML = '';
   const msgEl = document.createElement('p');
   msgEl.style.cssText = 'font-size:13px;color:var(--text-secondary);margin:0;line-height:1.5;';
