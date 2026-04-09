@@ -19,6 +19,7 @@ const gitStatusEl = document.getElementById('git-status')!;
 const btnAddSession = document.getElementById('btn-add-session')!;
 const btnAddMcpInspector = document.getElementById('btn-add-mcp-inspector')!;
 const btnToggleSwarm = document.getElementById('btn-toggle-swarm')!;
+const btnToggleBoard = document.getElementById('btn-toggle-board')!;
 const btnHelp = document.getElementById('btn-help')!;
 
 let activeContextMenu: HTMLElement | null = null;
@@ -37,6 +38,7 @@ export function initTabBar(): void {
   });
   btnAddMcpInspector.addEventListener('click', promptNewMcpInspector);
   btnToggleSwarm.addEventListener('click', () => appState.toggleSwarm());
+  btnToggleBoard.addEventListener('click', () => appState.toggleBoard());
   btnHelp.addEventListener('click', () => showHelpDialog());
   gitStatusEl.addEventListener('click', (e) => showBranchContextMenu(e));
 
@@ -476,6 +478,7 @@ function render(): void {
 
   // Update swarm toggle button visual
   btnToggleSwarm.style.color = project.layout.mode === 'swarm' ? 'var(--accent)' : '';
+  btnToggleBoard.style.color = project.layout.mode === 'board' ? 'var(--accent)' : '';
 }
 
 function renderGitStatus(): void {

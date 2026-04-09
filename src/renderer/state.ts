@@ -1,5 +1,5 @@
 import type { VibeyardApi } from './types.js';
-import type { SessionRecord, ProjectRecord, Preferences, PersistedState, ArchivedSession, ProviderId, CostInfo, ContextWindowInfo, InitialContextSnapshot, ReadinessResult } from '../shared/types.js';
+import type { SessionRecord, ProjectRecord, Preferences, PersistedState, ArchivedSession, ProviderId, CostInfo, ContextWindowInfo, InitialContextSnapshot, ReadinessResult, BoardColumn, BoardData } from '../shared/types.js';
 import { getCost, restoreCost } from './session-cost.js';
 import { restoreContext } from './session-context.js';
 import { getProviderCapabilities, getProviderAvailabilitySnapshot } from './provider-availability.js';
@@ -29,6 +29,7 @@ type EventType =
   | 'readiness-changed'
   | 'sidebar-toggled'
   | 'cli-session-cleared'
+  | 'board-changed'
   | 'state-loaded';
 
 type EventCallback = (data?: unknown) => void;
@@ -157,6 +158,16 @@ class AppState {
         }
       }
     }
+    // Ensure all projects have board data; clear stale runtime sessionIds
+    for (const project of this.state.projects) {
+      if (!project.board) {
+        project.board = createDefaultBoard();
+      }
+      for (const task of project.board.tasks) {
+        task.sessionId = undefined;
+      }
+    }
+
     if (!this.state.starPromptDismissed) {
       this.state.appLaunchCount = (this.state.appLaunchCount ?? 0) + 1;
       this.persist();
@@ -794,6 +805,24 @@ class AppState {
     this.emit('session-changed');
   }
 
+  notifyBoardChanged(): void {
+    this.persist();
+    this.emit('board-changed');
+  }
+
+  toggleBoard(): void {
+    const project = this.activeProject;
+    if (!project) return;
+
+    if (project.layout.mode === 'board') {
+      project.layout.mode = 'tabs';
+    } else {
+      project.layout.mode = 'board';
+    }
+    this.persist();
+    this.emit('layout-changed');
+  }
+
   toggleSplit(): void {
     this.toggleSwarm();
   }
@@ -932,6 +961,16 @@ class AppState {
     this.persist();
     this.emit('session-changed');
   }
+}
+
+export function createDefaultBoard(): BoardData {
+  const columns: BoardColumn[] = [
+    { id: crypto.randomUUID(), title: 'Backlog', order: 0, behavior: 'inbox' },
+    { id: crypto.randomUUID(), title: 'Ready',   order: 1, behavior: 'none' },
+    { id: crypto.randomUUID(), title: 'Running', order: 2, behavior: 'active' },
+    { id: crypto.randomUUID(), title: 'Done',    order: 3, behavior: 'terminal' },
+  ];
+  return { columns, tasks: [] };
 }
 
 /** @internal Test-only: reset all module state */

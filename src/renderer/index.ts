@@ -37,6 +37,8 @@ import type { InspectorEvent } from '../shared/types.js';
 import { getContext } from './session-context.js';
 import { initSessionInspector } from './components/session-inspector.js';
 import { loadProviderMetas } from './provider-availability.js';
+import { initBoard } from './components/board/board-view.js';
+import { initBoardSessionSync } from './board-session-sync.js';
 
 let isQuitting = false;
 window.vibeyard.app.onQuitting(() => {
@@ -170,6 +172,8 @@ async function main(): Promise<void> {
   initReadinessSection();
   initShareManager();
   initSessionInspector();
+  initBoard();
+  initBoardSessionSync();
   startGitPolling();
 
   window.vibeyard.menu.onUsageStats(() => showUsageModal());

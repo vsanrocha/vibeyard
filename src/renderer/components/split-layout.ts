@@ -55,6 +55,7 @@ import {
   getBrowserTabInstance,
 } from './browser-tab-pane.js';
 import { quickNewSession } from './tab-bar.js';
+import { renderBoard, hideBoardView } from './board/board-view.js';
 
 const container = document.getElementById('terminal-container')!;
 
@@ -207,11 +208,16 @@ export function renderLayout(): void {
   hideAllRemotePanes();
   hideAllBrowserTabPanes();
 
-  if (project.layout.mode === 'swarm' && project.layout.splitPanes.length >= 1) {
+  if (project.layout.mode === 'board') {
+    renderBoardMode();
+  } else if (project.layout.mode === 'swarm' && project.layout.splitPanes.length >= 1) {
+    hideBoardView();
     renderSwarmMode(project);
   } else if (project.layout.mode === 'split' && project.layout.splitPanes.length > 1) {
+    hideBoardView();
     renderSplitMode(project);
   } else {
+    hideBoardView();
     renderTabMode(project);
   }
 
@@ -362,6 +368,13 @@ function renderSwarmMode(project: ProjectRecord): void {
 
   updateSwarmPaneStyles(project);
   focusActivePane(project);
+}
+
+function renderBoardMode(): void {
+  setContainerClass('board-mode');
+  container.style.gridTemplateColumns = '';
+  container.style.gridTemplateRows = '';
+  renderBoard();
 }
 
 function appendEmptyCells(count: number, target: HTMLElement): void {

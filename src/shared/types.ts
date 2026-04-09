@@ -124,6 +124,56 @@ export interface ProjectInsightsData {
   dismissed: string[];
 }
 
+// --- Board ---
+
+export type ColumnBehavior = 'inbox' | 'active' | 'terminal' | 'none';
+
+export interface BoardColumn {
+  id: string;
+  title: string;
+  order: number;
+  behavior: ColumnBehavior;
+  color?: string;
+  locked?: boolean;
+}
+
+export interface TaskAttachment {
+  id: string;
+  path: string;
+  name: string;
+  addedAt: number;
+}
+
+export interface BoardTask {
+  id: string;
+  title: string;
+  prompt: string;
+  notes?: string;
+  cwd: string;
+  columnId: string;
+  order: number;
+  sessionId?: string;
+  cliSessionId?: string;
+  providerId?: ProviderId;
+  tags?: string[];
+  attachments?: TaskAttachment[];
+  autoInject?: boolean;
+  dangerousMode?: boolean;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface TagDefinition {
+  name: string;
+  color: string;
+}
+
+export interface BoardData {
+  columns: BoardColumn[];
+  tasks: BoardTask[];
+  tags?: TagDefinition[];
+}
+
 export interface ProjectRecord {
   id: string;
   name: string;
@@ -131,10 +181,11 @@ export interface ProjectRecord {
   sessions: SessionRecord[];
   activeSessionId: string | null;
   layout: {
-    mode: 'tabs' | 'split' | 'swarm';
+    mode: 'tabs' | 'split' | 'swarm' | 'board';
     splitPanes: string[];
     splitDirection: 'horizontal' | 'vertical';
   };
+  board?: BoardData;
   sessionHistory?: ArchivedSession[];
   insights?: ProjectInsightsData;
   defaultArgs?: string;

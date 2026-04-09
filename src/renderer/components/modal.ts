@@ -3,9 +3,10 @@ import { createCustomSelect } from './custom-select.js';
 export interface FieldDef {
   label: string;
   id: string;
-  type?: 'text' | 'checkbox' | 'select';
+  type?: 'text' | 'checkbox' | 'select' | 'textarea';
   placeholder?: string;
   defaultValue?: string;
+  rows?: number;
   options?: { value: string; label: string; disabled?: boolean }[];
   buttonLabel?: string;
   onButtonClick?: (input: HTMLInputElement) => void;
@@ -42,9 +43,11 @@ export function closeModal(): void {
 export function showModal(
   title: string,
   fields: FieldDef[],
-  onConfirm: (values: Record<string, string>) => void | Promise<void>
+  onConfirm: (values: Record<string, string>) => void | Promise<void>,
+  options?: { confirmLabel?: string }
 ): void {
   titleEl.textContent = title;
+  btnConfirm.textContent = options?.confirmLabel ?? 'Create';
   bodyEl.innerHTML = '';
 
   for (const field of fields) {
@@ -66,6 +69,14 @@ export function showModal(
       }
       div.appendChild(input);
       div.appendChild(label);
+    } else if (field.type === 'textarea') {
+      div.appendChild(label);
+      const textarea = document.createElement('textarea');
+      textarea.id = `modal-${field.id}`;
+      textarea.placeholder = field.placeholder ?? '';
+      textarea.value = field.defaultValue ?? '';
+      textarea.rows = field.rows ?? 3;
+      div.appendChild(textarea);
     } else if (field.type === 'select') {
       div.appendChild(label);
       const sel = createCustomSelect(`modal-${field.id}`, field.options ?? [], field.defaultValue);
@@ -129,7 +140,7 @@ export function showModal(
   };
 
   const handleKeydown = (e: KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !(e.target instanceof HTMLTextAreaElement)) {
       e.preventDefault();
       handleConfirm();
     } else if (e.key === 'Escape') {
