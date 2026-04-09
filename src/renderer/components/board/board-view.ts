@@ -2,11 +2,12 @@ import { appState } from '../../state.js';
 import { getBoard } from '../../board-state.js';
 import { createColumnElement } from './board-column.js';
 import { showTaskModal } from './board-task-modal.js';
-import { initBoardDnd, cleanupBoardDnd } from './board-dnd.js';
+import { initBoardDnd, cleanupBoardDnd, isDragActive, setDragEndCallback } from './board-dnd.js';
 import type { BoardColumn } from '../../../shared/types.js';
 
 let boardEl: HTMLElement | null = null;
 let dndInitialized = false;
+let pendingRender = false;
 
 export function initBoard(): void {
   appState.on('board-changed', () => {
@@ -21,6 +22,9 @@ export function initBoard(): void {
     } else {
       hideBoardView();
     }
+  });
+  setDragEndCallback(() => {
+    if (pendingRender) renderBoard();
   });
 }
 
@@ -53,6 +57,12 @@ export function createBoardView(): HTMLElement {
 }
 
 export function renderBoard(): void {
+  if (isDragActive()) {
+    pendingRender = true;
+    return;
+  }
+  pendingRender = false;
+
   const board = getBoard();
   if (!board) return;
 

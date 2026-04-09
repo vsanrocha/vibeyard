@@ -9,6 +9,8 @@ let startX = 0;
 let startY = 0;
 const DRAG_THRESHOLD = 5;
 let pointerStarted = false;
+let capturedPointerId: number | null = null;
+let onDragEnd: (() => void) | null = null;
 
 const container = () => document.querySelector('.board-columns') as HTMLElement | null;
 
@@ -16,13 +18,23 @@ export function initBoardDnd(): void {
   document.addEventListener('pointerdown', onPointerDown);
   document.addEventListener('pointermove', onPointerMove);
   document.addEventListener('pointerup', onPointerUp);
+  document.addEventListener('pointercancel', onPointerCancel);
 }
 
 export function cleanupBoardDnd(): void {
   document.removeEventListener('pointerdown', onPointerDown);
   document.removeEventListener('pointermove', onPointerMove);
   document.removeEventListener('pointerup', onPointerUp);
+  document.removeEventListener('pointercancel', onPointerCancel);
   cancelDrag();
+}
+
+export function isDragActive(): boolean {
+  return isDragging;
+}
+
+export function setDragEndCallback(cb: () => void): void {
+  onDragEnd = cb;
 }
 
 function onPointerDown(e: PointerEvent): void {
@@ -54,6 +66,8 @@ function onPointerMove(e: PointerEvent): void {
 
     // Start drag
     isDragging = true;
+    capturedPointerId = e.pointerId;
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
     const card = document.querySelector(`.board-card[data-task-id="${dragTaskId}"]`) as HTMLElement;
     if (!card) { cancelDrag(); return; }
 
@@ -88,12 +102,25 @@ function onPointerUp(e: PointerEvent): void {
   }
 
   cancelDrag();
+  if (onDragEnd) onDragEnd();
+}
+
+function onPointerCancel(): void {
+  cancelDrag();
+  if (onDragEnd) onDragEnd();
 }
 
 function cancelDrag(): void {
   if (ghostEl) {
     ghostEl.remove();
     ghostEl = null;
+  }
+
+  if (capturedPointerId !== null) {
+    try {
+      document.releasePointerCapture(capturedPointerId);
+    } catch { /* already released */ }
+    capturedPointerId = null;
   }
 
   document.querySelectorAll('.board-card.dragging').forEach(el => el.classList.remove('dragging'));
