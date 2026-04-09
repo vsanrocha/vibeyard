@@ -10,6 +10,29 @@ function moveTaskToDone(task: BoardTask): void {
   }
 }
 
+export function injectPrompt(sessionId: string, prompt: string): void {
+  if (!prompt.trim()) return;
+
+  const READY_TIMEOUT = 5000;
+  let resolved = false;
+
+  const unsubscribe = onStatusChange((sid, status) => {
+    if (sid !== sessionId || resolved) return;
+    if (status === 'idle' || status === 'waiting' || status === 'prompt-waiting') {
+      resolved = true;
+      unsubscribe();
+      window.vibeyard.pty.write(sessionId, prompt);
+    }
+  });
+
+  setTimeout(() => {
+    if (!resolved) {
+      resolved = true;
+      unsubscribe();
+    }
+  }, READY_TIMEOUT);
+}
+
 export function initBoardSessionSync(): void {
   onStatusChange((sessionId, status) => {
     if (status !== 'completed') return;
