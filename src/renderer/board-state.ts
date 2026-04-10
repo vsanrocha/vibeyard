@@ -67,10 +67,11 @@ export function updateTask(taskId: string, updates: Partial<BoardTask>): void {
   if (!board) return;
   const task = board.tasks.find(t => t.id === taskId);
   if (!task) return;
-  if (updates.columnId && !board.columns.some(c => c.id === updates.columnId)) {
-    delete updates.columnId;
+  const safeUpdates = { ...updates };
+  if (safeUpdates.columnId && !board.columns.some(c => c.id === safeUpdates.columnId)) {
+    delete safeUpdates.columnId;
   }
-  Object.assign(task, updates, { updatedAt: Date.now() });
+  Object.assign(task, safeUpdates, { updatedAt: Date.now() });
   appState.notifyBoardChanged();
 }
 

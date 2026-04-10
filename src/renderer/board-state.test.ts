@@ -146,6 +146,19 @@ describe('board-state', () => {
       updateTask(task.id, { columnId: 'non-existent' });
       expect(task.columnId).toBe('col-backlog'); // unchanged
     });
+
+    it('does not mutate caller updates object when invalid columnId is passed', () => {
+      const task = addTask({ title: 'Old Title', prompt: 'p' })!;
+      const updates = { columnId: 'non-existent', title: 'New Title' };
+      updateTask(task.id, updates);
+      // Verify caller's updates object was not mutated
+      expect(updates.columnId).toBe('non-existent');
+      // Verify task was still updated with valid changes
+      const board = getBoard()!;
+      const updated = board.tasks.find(t => t.id === task.id);
+      expect(updated!.title).toBe('New Title');
+      expect(updated!.columnId).toBe('col-backlog'); // unchanged
+    });
   });
 
   describe('deleteTask', () => {
