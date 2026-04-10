@@ -7,6 +7,7 @@ export interface FieldDef {
   placeholder?: string;
   defaultValue?: string;
   rows?: number;
+  maxLength?: number;
   options?: { value: string; label: string; disabled?: boolean }[];
   buttonLabel?: string;
   onButtonClick?: (input: HTMLInputElement) => void;
@@ -86,6 +87,7 @@ export function showModal(
       textarea.placeholder = field.placeholder ?? '';
       textarea.value = field.defaultValue ?? '';
       textarea.rows = field.rows ?? 3;
+      if (field.maxLength) textarea.maxLength = field.maxLength;
       div.appendChild(textarea);
     } else if (field.type === 'select') {
       div.appendChild(label);

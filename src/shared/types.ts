@@ -137,13 +137,6 @@ export interface BoardColumn {
   locked?: boolean;
 }
 
-export interface TaskAttachment {
-  id: string;
-  path: string;
-  name: string;
-  addedAt: number;
-}
-
 export interface BoardTask {
   id: string;
   title: string;
@@ -156,9 +149,6 @@ export interface BoardTask {
   cliSessionId?: string;
   providerId?: ProviderId;
   tags?: string[];
-  attachments?: TaskAttachment[];
-  autoInject?: boolean;
-  dangerousMode?: boolean;
   createdAt: number;
   updatedAt: number;
 }

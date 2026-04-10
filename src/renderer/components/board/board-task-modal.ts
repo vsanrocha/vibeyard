@@ -28,6 +28,7 @@ export function showTaskModal(mode: 'create' | 'edit', task?: BoardTask, default
       placeholder: 'Instructions for Claude...',
       defaultValue: task?.prompt ?? '',
       rows: 4,
+      maxLength: 10000,
     },
     {
       label: 'Notes',

@@ -30,7 +30,7 @@ import {
   getTaskBySessionId, getTaskByCliSessionId,
   addTask, updateTask, deleteTask, moveTask,
   addColumn, renameColumn, deleteColumn, reorderColumns,
-  addTag, removeTag, updateTagColor, shouldAutoInject,
+  addTag, removeTag, updateTagColor,
   addTagToTask, removeTagFromTask, getTagColor, getTagCount,
 } from './board-state';
 
@@ -382,19 +382,4 @@ describe('board-state', () => {
     });
   });
 
-  describe('shouldAutoInject', () => {
-    it('returns false by default', () => {
-      const task = addTask({ title: 'T', prompt: 'do stuff' })!;
-      const result = shouldAutoInject(task.id);
-      expect(result.inject).toBe(false);
-      expect(result.prompt).toBe('do stuff');
-    });
-
-    it('returns true when autoInject is set', () => {
-      const task = addTask({ title: 'T', prompt: 'auto' })!;
-      updateTask(task.id, { autoInject: true });
-      const result = shouldAutoInject(task.id);
-      expect(result.inject).toBe(true);
-    });
-  });
 });

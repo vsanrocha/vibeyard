@@ -287,10 +287,3 @@ export function getTagCount(tagName: string): number {
   return board.tasks.filter(t => t.tags?.includes(tagName)).length;
 }
 
-export function shouldAutoInject(taskId: string): { inject: boolean; prompt: string } {
-  const board = getBoard();
-  if (!board) return { inject: false, prompt: '' };
-  const task = board.tasks.find(t => t.id === taskId);
-  if (!task) return { inject: false, prompt: '' };
-  return { inject: task.autoInject === true, prompt: task.prompt };
-}
