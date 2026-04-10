@@ -45,6 +45,7 @@ export function initSidebar(): void {
   appState.on('project-changed', render);
   appState.on('session-added', render);
   appState.on('session-removed', render);
+  appState.on('layout-changed', render);
 
 
   onCostChange(() => {
@@ -94,6 +95,35 @@ function render(): void {
     });
 
     projectListEl.appendChild(el);
+
+    if (project.id === appState.activeProjectId) {
+      const subItems = document.createElement('div');
+      subItems.className = 'project-sub-items';
+
+      const boardItem = document.createElement('div');
+      boardItem.className = 'project-sub-item' + (project.layout.mode === 'board' ? ' active' : '');
+      boardItem.textContent = 'Board';
+      boardItem.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (project.layout.mode !== 'board') {
+          appState.toggleBoard();
+        }
+      });
+
+      const sessionsItem = document.createElement('div');
+      sessionsItem.className = 'project-sub-item' + (project.layout.mode !== 'board' ? ' active' : '');
+      sessionsItem.textContent = 'Sessions';
+      sessionsItem.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (project.layout.mode === 'board') {
+          appState.toggleBoard();
+        }
+      });
+
+      subItems.appendChild(boardItem);
+      subItems.appendChild(sessionsItem);
+      projectListEl.appendChild(subItems);
+    }
   }
 }
 
