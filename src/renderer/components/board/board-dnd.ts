@@ -149,13 +149,11 @@ function injectDropTargets(excludeTaskId: string): void {
   }
 
   // Cache target positions so highlightNearestTarget avoids querySelectorAll + getBoundingClientRect per pointermove
-  requestAnimationFrame(() => {
-    cachedTargets = [];
-    for (const el of document.querySelectorAll('.board-drop-target')) {
-      const rect = el.getBoundingClientRect();
-      cachedTargets.push({ el: el as HTMLElement, left: rect.left, right: rect.right, centerY: rect.top + rect.height / 2 });
-    }
-  });
+  cachedTargets = [];
+  for (const el of document.querySelectorAll('.board-drop-target')) {
+    const rect = el.getBoundingClientRect();
+    cachedTargets.push({ el: el as HTMLElement, left: rect.left, right: rect.right, centerY: rect.top + rect.height / 2 });
+  }
 }
 
 function createDropTarget(columnId: string, order: number): HTMLElement {
