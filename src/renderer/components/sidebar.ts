@@ -45,7 +45,7 @@ export function initSidebar(): void {
   appState.on('project-changed', render);
   appState.on('session-added', render);
   appState.on('session-removed', render);
-  appState.on('layout-changed', render);
+  appState.on('layout-changed', updateSubItems);
 
 
   onCostChange(() => {
@@ -59,6 +59,25 @@ export function initSidebar(): void {
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideProjectContextMenu(); });
 
   render();
+}
+
+function makeSubItem(label: string, isActive: boolean, onClick: () => void): HTMLDivElement {
+  const el = document.createElement('div');
+  el.className = 'project-sub-item' + (isActive ? ' active' : '');
+  el.textContent = label;
+  el.addEventListener('click', (e) => { e.stopPropagation(); onClick(); });
+  return el;
+}
+
+function updateSubItems(): void {
+  const subItems = projectListEl.querySelector('.project-sub-items');
+  if (!subItems) return;
+  const project = appState.activeProject;
+  if (!project) return;
+  const isBoardMode = project.layout.mode === 'board';
+  subItems.innerHTML = '';
+  subItems.appendChild(makeSubItem('Board', isBoardMode, () => { if (!isBoardMode) appState.toggleBoard(); }));
+  subItems.appendChild(makeSubItem('Sessions', !isBoardMode, () => { if (isBoardMode) appState.toggleBoard(); }));
 }
 
 function render(): void {
@@ -97,31 +116,11 @@ function render(): void {
     projectListEl.appendChild(el);
 
     if (project.id === appState.activeProjectId) {
+      const isBoardMode = project.layout.mode === 'board';
       const subItems = document.createElement('div');
       subItems.className = 'project-sub-items';
-
-      const boardItem = document.createElement('div');
-      boardItem.className = 'project-sub-item' + (project.layout.mode === 'board' ? ' active' : '');
-      boardItem.textContent = 'Board';
-      boardItem.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (project.layout.mode !== 'board') {
-          appState.toggleBoard();
-        }
-      });
-
-      const sessionsItem = document.createElement('div');
-      sessionsItem.className = 'project-sub-item' + (project.layout.mode !== 'board' ? ' active' : '');
-      sessionsItem.textContent = 'Sessions';
-      sessionsItem.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (project.layout.mode === 'board') {
-          appState.toggleBoard();
-        }
-      });
-
-      subItems.appendChild(boardItem);
-      subItems.appendChild(sessionsItem);
+      subItems.appendChild(makeSubItem('Board', isBoardMode, () => { if (!isBoardMode) appState.toggleBoard(); }));
+      subItems.appendChild(makeSubItem('Sessions', !isBoardMode, () => { if (isBoardMode) appState.toggleBoard(); }));
       projectListEl.appendChild(subItems);
     }
   }
