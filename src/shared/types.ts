@@ -153,7 +153,6 @@ export interface BoardTask {
   title: string;
   prompt: string;
   notes?: string;
-  cwd: string;
   columnId: string;
   order: number;
   sessionId?: string;
