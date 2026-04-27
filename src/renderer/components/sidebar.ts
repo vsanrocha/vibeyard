@@ -169,10 +169,12 @@ function buildProjectActions(
   const actions = document.createElement('div');
   actions.className = 'project-actions';
 
-  const kanbanBtn = makeActionButton('Kanban', project.layout.mode === 'board');
+  const activeSession = project.sessions.find((s) => s.id === project.activeSessionId);
+  const kanbanActive = appState.activeProjectId === project.id && activeSession?.type === 'kanban';
+  const kanbanBtn = makeActionButton('Kanban', kanbanActive);
   kanbanBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    appState.toggleBoard();
+    appState.openKanbanTab(project.id);
   });
   actions.appendChild(kanbanBtn);
 

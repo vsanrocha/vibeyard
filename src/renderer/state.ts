@@ -12,6 +12,7 @@ import {
   buildCliSession,
   buildDiffViewerSession,
   buildFileReaderSession,
+  buildKanbanSession,
   buildMcpInspectorSession,
   buildProjectTabSession,
   buildRemoteSession,
@@ -148,6 +149,17 @@ class AppState {
       }
       for (const task of project.board.tasks) {
         task.sessionId = undefined;
+      }
+      // Migrate legacy layout.mode === 'board' to a kanban tab session
+      const legacyMode = (project.layout as { mode: string }).mode;
+      if (legacyMode === 'board') {
+        project.layout.mode = 'tabs';
+        const existingKanban = project.sessions.find((s) => s.type === 'kanban');
+        const kanbanSession = existingKanban ?? buildKanbanSession({ projectName: project.name });
+        if (!existingKanban) {
+          project.sessions.push(kanbanSession);
+        }
+        project.activeSessionId = kanbanSession.id;
       }
     }
 
@@ -408,7 +420,24 @@ class AppState {
     const existing = project.sessions.find((s) => s.type === 'project-tab');
     if (existing) return this.activateExistingSession(project, existing);
 
-    const session = buildProjectTabSession({ name: project.name });
+    const session = buildProjectTabSession({ projectName: project.name });
+    attachSessionToProject(project, session);
+    this.commitNewSession(projectId, session);
+    return session;
+  }
+
+  openKanbanTab(projectId: string): SessionRecord | undefined {
+    const project = this.state.projects.find((p) => p.id === projectId);
+    if (!project) return undefined;
+
+    if (this.state.activeProjectId !== projectId) {
+      this.setActiveProject(projectId);
+    }
+
+    const existing = project.sessions.find((s) => s.type === 'kanban');
+    if (existing) return this.activateExistingSession(project, existing);
+
+    const session = buildKanbanSession({ projectName: project.name });
     attachSessionToProject(project, session);
     this.commitNewSession(projectId, session);
     return session;
@@ -671,6 +700,7 @@ class AppState {
     if (!project) return;
     const session = project.sessions.find((s) => s.id === sessionId);
     if (!session) return;
+    if (session.type === 'kanban' || session.type === 'project-tab') return;
     session.name = name.slice(0, MAX_SESSION_NAME_LENGTH);
     if (userRenamed) session.userRenamed = true;
     // Keep history entry in sync if this session was resumed from history
@@ -688,19 +718,6 @@ class AppState {
   notifyBoardChanged(): void {
     this.persist();
     this.emit('board-changed');
-  }
-
-  toggleBoard(): void {
-    const project = this.activeProject;
-    if (!project) return;
-
-    if (project.layout.mode === 'board') {
-      project.layout.mode = 'tabs';
-    } else {
-      project.layout.mode = 'board';
-    }
-    this.persist();
-    this.emit('layout-changed');
   }
 
   toggleSplit(): void {

@@ -62,8 +62,15 @@ import {
   attachProjectTabToContainer,
   getProjectTabInstance,
 } from './project-tab/pane.js';
+import {
+  createKanbanPane,
+  destroyKanbanPane,
+  showKanbanPane,
+  hideAllKanbanPanes,
+  attachKanbanToContainer,
+  getKanbanInstance,
+} from './kanban/pane.js';
 import { quickNewSession } from './tab-bar.js';
-import { renderBoard, hideBoardView } from './board/board-view.js';
 import { isCliSession } from '../session-utils.js';
 
 const container = document.getElementById('terminal-container')!;
@@ -131,6 +138,9 @@ function onSessionAdded(data: unknown): void {
   } else if (session.type === 'project-tab') {
     createProjectTabPane(session.id, projectId);
     renderLayout();
+  } else if (session.type === 'kanban') {
+    createKanbanPane(session.id, projectId);
+    renderLayout();
   } else {
     // Create and spawn immediately
     createTerminalPane(session.id, session.cwd || project.path, session.cliSessionId, !!session.cliSessionId, session.args || '', (session.providerId as import('../../shared/types').ProviderId) || 'claude', project.id);
@@ -163,6 +173,8 @@ function onSessionRemoved(data: unknown): void {
     destroyBrowserTabPane(sessionId);
   } else if (getProjectTabInstance(sessionId)) {
     destroyProjectTabPane(sessionId);
+  } else if (getKanbanInstance(sessionId)) {
+    destroyKanbanPane(sessionId);
   } else {
     destroyTerminal(sessionId);
   }
@@ -180,6 +192,7 @@ export function renderLayout(): void {
     hideAllRemotePanes();
     hideAllBrowserTabPanes();
     hideAllProjectTabPanes();
+    hideAllKanbanPanes();
     setContainerClass('');
     showEmptyState(project);
     return;
@@ -213,6 +226,10 @@ export function renderLayout(): void {
       if (!getProjectTabInstance(session.id)) {
         createProjectTabPane(session.id, project.id);
       }
+    } else if (session.type === 'kanban') {
+      if (!getKanbanInstance(session.id)) {
+        createKanbanPane(session.id, project.id);
+      }
     } else {
       if (!getTerminalInstance(session.id)) {
         createTerminalPane(session.id, session.cwd || project.path, session.cliSessionId, !!session.cliSessionId, session.args || '', session.providerId || 'claude', project.id);
@@ -227,17 +244,13 @@ export function renderLayout(): void {
   hideAllRemotePanes();
   hideAllBrowserTabPanes();
   hideAllProjectTabPanes();
+  hideAllKanbanPanes();
 
-  if (project.layout.mode === 'board') {
-    renderBoardMode();
-  } else if (project.layout.mode === 'swarm' && project.layout.splitPanes.length >= 1) {
-    hideBoardView();
+  if (project.layout.mode === 'swarm' && project.layout.splitPanes.length >= 1) {
     renderSwarmMode(project);
   } else if (project.layout.mode === 'split' && project.layout.splitPanes.length > 1) {
-    hideBoardView();
     renderSplitMode(project);
   } else {
-    hideBoardView();
     renderTabMode(project);
   }
 
@@ -267,6 +280,9 @@ function attachNonCliPane(session: { id: string; type?: string; fileReaderLine?:
   } else if (session.type === 'project-tab') {
     attachProjectTabToContainer(session.id, target);
     showProjectTabPane(session.id, inSplit);
+  } else if (session.type === 'kanban') {
+    attachKanbanToContainer(session.id, target);
+    showKanbanPane(session.id, inSplit);
   }
 }
 
@@ -391,13 +407,6 @@ function renderSwarmMode(project: ProjectRecord): void {
 
   updateSwarmPaneStyles(project);
   focusActivePane(project);
-}
-
-function renderBoardMode(): void {
-  setContainerClass('board-mode');
-  container.style.gridTemplateColumns = '';
-  container.style.gridTemplateRows = '';
-  renderBoard();
 }
 
 function appendEmptyCells(count: number, target: HTMLElement): void {

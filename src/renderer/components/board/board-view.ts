@@ -5,6 +5,7 @@ import { showTaskModal } from './board-task-modal.js';
 import { initBoardDnd, cleanupBoardDnd, isDragActive, setDragEndCallback } from './board-dnd.js';
 import { showConfirmModal } from '../modal.js';
 import { showContextMenu } from './board-context-menu.js';
+import { instances as kanbanInstances } from '../kanban/instance.js';
 import type { BoardColumn, TagDefinition, BoardData } from '../../../shared/types.js';
 import {
   setSearchQuery, getSearchQuery, toggleTagFilter, isTagFilterActive,
@@ -15,25 +16,25 @@ let boardEl: HTMLElement | null = null;
 let dndInitialized = false;
 let pendingRender = false;
 
+function isKanbanActive(): boolean {
+  const project = appState.activeProject;
+  if (!project) return false;
+  const active = project.sessions.find((s) => s.id === project.activeSessionId);
+  return active?.type === 'kanban';
+}
+
 export function initBoard(): void {
   appState.on('board-changed', () => {
-    if (appState.activeProject?.layout.mode === 'board') renderBoard();
+    if (isKanbanActive()) renderBoard();
   });
   appState.on('project-changed', () => {
-    if (appState.activeProject?.layout.mode === 'board') renderBoard();
-  });
-  appState.on('layout-changed', () => {
-    if (appState.activeProject?.layout.mode === 'board') {
-      renderBoard();
-    } else {
-      hideBoardView();
-    }
+    if (isKanbanActive()) renderBoard();
   });
   setDragEndCallback(() => {
     if (pendingRender) renderBoard();
   });
   onFilterChange(() => {
-    if (appState.activeProject?.layout.mode === 'board') renderBoard();
+    if (isKanbanActive()) renderBoard();
   });
 }
 
@@ -70,7 +71,7 @@ export function createBoardView(): HTMLElement {
   return el;
 }
 
-export function renderBoard(): void {
+export function renderBoard(target?: HTMLElement): void {
   if (isDragActive()) {
     pendingRender = true;
     return;
@@ -80,7 +81,8 @@ export function renderBoard(): void {
   const board = getBoard();
   if (!board) return;
 
-  const container = document.getElementById('terminal-container')!;
+  const container = target ?? activeKanbanContainer();
+  if (!container) return;
 
   if (!boardEl) {
     boardEl = createBoardView();
@@ -120,6 +122,15 @@ export function hideBoardView(): void {
   if (boardEl) {
     boardEl.style.display = 'none';
   }
+}
+
+function activeKanbanContainer(): HTMLElement | null {
+  const project = appState.activeProject;
+  if (!project) return null;
+  const active = project.sessions.find((s) => s.id === project.activeSessionId);
+  if (active?.type !== 'kanban') return null;
+  const instance = kanbanInstances.get(active.id);
+  return instance?.element ?? null;
 }
 
 export function destroyBoardView(): void {

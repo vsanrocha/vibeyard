@@ -57,12 +57,23 @@ export function buildBrowserTabSession(opts: BaseOpts & { name: string; url?: st
   };
 }
 
-export function buildProjectTabSession(opts: BaseOpts & { name: string }): SessionRecord {
-  const { name, id = crypto.randomUUID(), createdAt = new Date().toISOString() } = opts;
+export function buildProjectTabSession(opts: BaseOpts & { projectName: string }): SessionRecord {
+  const { projectName, id = crypto.randomUUID(), createdAt = new Date().toISOString() } = opts;
   return {
     id,
-    name,
+    name: `${projectName} - Overview`,
     type: 'project-tab',
+    cliSessionId: null,
+    createdAt,
+  };
+}
+
+export function buildKanbanSession(opts: BaseOpts & { projectName: string }): SessionRecord {
+  const { projectName, id = crypto.randomUUID(), createdAt = new Date().toISOString() } = opts;
+  return {
+    id,
+    name: `${projectName} - Kanban`,
+    type: 'kanban',
     cliSessionId: null,
     createdAt,
   };

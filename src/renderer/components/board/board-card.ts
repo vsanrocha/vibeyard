@@ -172,20 +172,11 @@ export function runTask(task: BoardTask): void {
       }
     }
   }
-
-  // Switch to tabs view to see the terminal
-  if (project.layout.mode === 'board') {
-    appState.toggleBoard();
-  }
 }
 
 export function focusTaskSession(task: BoardTask): void {
   const project = appState.activeProject;
   if (!project || !task.sessionId) return;
-
-  if (project.layout.mode === 'board') {
-    appState.toggleBoard();
-  }
   appState.setActiveSession(project.id, task.sessionId);
 }
 

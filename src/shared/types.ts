@@ -78,7 +78,8 @@ export type SessionType =
   | 'file-reader'
   | 'remote-terminal'
   | 'browser-tab'
-  | 'project-tab';
+  | 'project-tab'
+  | 'kanban';
 
 export interface SessionRecord {
   id: string;
@@ -181,7 +182,7 @@ export interface ProjectRecord {
   sessions: SessionRecord[];
   activeSessionId: string | null;
   layout: {
-    mode: 'tabs' | 'split' | 'swarm' | 'board';
+    mode: 'tabs' | 'split' | 'swarm';
     splitPanes: string[];
     splitDirection: 'horizontal' | 'vertical';
   };
