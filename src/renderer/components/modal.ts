@@ -171,13 +171,13 @@ export function showModal(
 
   btnConfirm.addEventListener('click', handleConfirm);
   btnCancel.addEventListener('click', handleCancel);
-  overlay.addEventListener('keydown', handleKeydown);
+  document.addEventListener('keydown', handleKeydown);
 
   // Store for cleanup
   (overlay as any)._cleanup = () => {
     btnConfirm.removeEventListener('click', handleConfirm);
     btnCancel.removeEventListener('click', handleCancel);
-    overlay.removeEventListener('keydown', handleKeydown);
+    document.removeEventListener('keydown', handleKeydown);
   };
 }
 
@@ -229,12 +229,12 @@ export function showConfirmDialog(
 
   btnConfirm.addEventListener('click', handleConfirm);
   btnCancel.addEventListener('click', handleCancel);
-  overlay.addEventListener('keydown', handleKeydown);
+  document.addEventListener('keydown', handleKeydown);
 
   (overlay as any)._cleanup = () => {
     btnConfirm.removeEventListener('click', handleConfirm);
     btnCancel.removeEventListener('click', handleCancel);
-    overlay.removeEventListener('keydown', handleKeydown);
+    document.removeEventListener('keydown', handleKeydown);
   };
 }
 
